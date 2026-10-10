@@ -568,34 +568,40 @@
         }
 
         function appendChatMessage(text, sender, isLoading = false) {
-            const chatMessages = document.getElementById('chat-messages');
-            const msgId = 'msg-' + Date.now() + Math.random();
-            const isUser = sender === 'user';
+    const chatMessages = document.getElementById('chat-messages');
+    const msgId = 'msg-' + Date.now() + Math.random();
+    const isUser = sender === 'user';
 
-            const wrapper = document.createElement('div');
-            wrapper.id = msgId;
-            wrapper.className = `flex items-start space-x-3 ${isUser ? 'flex-row-reverse space-x-reverse' : ''}`;
+    const wrapper = document.createElement('div');
+    wrapper.id = msgId;
+    wrapper.className = `flex items-start space-x-3 ${isUser ? 'flex-row-reverse space-x-reverse' : ''}`;
 
-            const avatar = document.createElement('div');
-            avatar.className = `w-8 h-8 rounded-xl flex items-center justify-center text-white shrink-0 mt-1 ${isUser ? 'bg-zinc-800 border border-zinc-700' : 'bg-gradient-to-tr from-purple-600 to-indigo-600'}`;
-            avatar.innerHTML = `<i class="fa-solid ${isUser ? 'fa-user text-xs' : 'fa-robot text-xs'}"></i>`;
+    const avatar = document.createElement('div');
+    avatar.className = `w-8 h-8 rounded-xl flex items-center justify-center text-white shrink-0 mt-1 ${isUser ? 'bg-zinc-800 border border-zinc-700' : 'bg-gradient-to-tr from-purple-600 to-indigo-600'}`;
+    avatar.innerHTML = `<i class="fa-solid ${isUser ? 'fa-user text-xs' : 'fa-robot text-xs'}"></i>`;
 
-            const bubble = document.createElement('div');
-            bubble.className = `glass-panel p-4 rounded-2xl max-w-2xl text-sm leading-relaxed ${isUser ? 'bg-purple-600/20 border-purple-500/30 text-white rounded-tr-sm' : 'border-zinc-700/80 text-zinc-200 rounded-tl-sm'}`;
+    const bubble = document.createElement('div');
+    bubble.className = `glass-panel p-4 rounded-2xl max-w-2xl text-sm leading-relaxed ${isUser ? 'bg-purple-600/20 border-purple-500/30 text-white rounded-tr-sm' : 'border-zinc-700/80 text-zinc-200 rounded-tl-sm'}`;
+    
+    if (isLoading) {
+        bubble.innerHTML = `<p class="animate-pulse text-zinc-400"><i class="fa-solid fa-spinner fa-spin mr-2"></i> ${text}</p>`;
+    } else {
+        // Clean up any stray AI artifact glitches or broken tags before rendering
+        let cleanedText = text
+            .replace(/AI send text.*?\n/gi, '') // Removes accidental model echo lines
+            .replace(/```markdown/g, '')        // Removes markdown code blocks that break UI
+            .replace(/```/g, '');
             
-            if (isLoading) {
-                bubble.innerHTML = `<p class="animate-pulse text-zinc-400"><i class="fa-solid fa-spinner fa-spin mr-2"></i> ${text}</p>`;
-            } else {
-                bubble.innerHTML = `<p class="whitespace-pre-wrap">${escapeHtml(text)}</p>`;
-            }
+        bubble.innerHTML = `<p class="whitespace-pre-wrap">${escapeHtml(cleanedText)}</p>`;
+    }
 
-            wrapper.appendChild(avatar);
-            wrapper.appendChild(bubble);
-            chatMessages.appendChild(wrapper);
-            chatMessages.scrollTop = chatMessages.scrollHeight;
+    wrapper.appendChild(avatar);
+    wrapper.appendChild(bubble);
+    chatMessages.appendChild(wrapper);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
 
-            return msgId;
-        }
+    return msgId;
+}
 
         function removeChatMessage(msgId) {
             const el = document.getElementById(msgId);
