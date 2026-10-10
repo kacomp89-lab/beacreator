@@ -26,6 +26,7 @@ export default async function handler(req, res) {
 
       const data = await response.json();
 
+      // Automatically retry if overloaded or experiencing high demand (HTTP 429 or 503)
       if ((response.status === 429 || response.status === 503) && attempt < maxRetries - 1) {
         attempt++;
         await new Promise(resolve => setTimeout(resolve, 1500 * attempt));
