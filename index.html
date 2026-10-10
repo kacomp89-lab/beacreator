@@ -556,7 +556,7 @@
             const loadingId = appendChatMessage('Thinking...', 'assistant', true);
 
             try {
-                const systemPrompt = "You are BeaCreator AI, an elite, high-energy viral content strategist and growth hacker. Use bold text for dramatic emphasis, punchy hooks, clean spacing, and zero boring filler text.";
+                const systemPrompt = "You are BeaCreator AI, an elite viral content strategist. CRITICAL RULE: Never output broken words, raw code snippets, glitchy symbols, or messy text artifacts. Always respond in clean, beautifully formatted Markdown with smooth, natural paragraphs and bullet points.";
                 
                 const responseText = await callBackendAI(message, systemPrompt);
                 removeChatMessage(loadingId);
