@@ -153,7 +153,7 @@
                     </div>
                     <div>
                         <div class="text-zinc-400 text-xs font-medium">System Architecture</div>
-                        <div class="text-lg font-bold text-white">Firebase Backend</div>
+                        <div class="text-lg font-bold text-white">Vercel Serverless</div>
                         <div class="text-[11px] text-emerald-400 mt-0.5"><i class="fa-solid fa-check mr-1"></i> Zero Client Configuration</div>
                     </div>
                 </div>
@@ -299,7 +299,7 @@
 
             <div id="gen-loading" class="hidden py-16 text-center space-y-4">
                 <div class="inline-block w-12 h-12 border-4 border-purple-500 border-t-transparent rounded-full animate-spin"></div>
-                <div class="text-zinc-300 font-semibold text-sm">Generating content via Firebase backend...</div>
+                <div class="text-zinc-300 font-semibold text-sm">Generating content via backend...</div>
             </div>
 
             <div id="gen-results" class="space-y-4"></div>
@@ -369,8 +369,7 @@
 
     <!-- Core App Scripting -->
     <script>
-        // REPLACE WITH YOUR FIREBASE CLOUD FUNCTION URL AFTER DEPLOYMENT
-        const FIREBASE_FUNCTION_URL = "/api/generate";
+        const API_ENDPOINT = "/api/generate";
 
         let chatHistory = [];
         let savedIdeas = JSON.parse(localStorage.getItem('beacreator_saved_ideas') || '[]');
@@ -380,7 +379,6 @@
             renderSavedIdeas();
         });
 
-        // Tab Navigation Switcher
         function switchTab(tabId) {
             const views = ['dashboard', 'chat', 'generator', 'saved', 'tips'];
             views.forEach(v => {
@@ -402,16 +400,18 @@
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        // Core Backend Call Function
         async function callBackendAI(prompt, systemInstruction = "") {
             try {
-                const response = await fetch(FIREBASE_FUNCTION_URL, {
+                const response = await fetch(API_ENDPOINT, {
                     method: "POST",
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
+                    headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ prompt, systemInstruction })
                 });
+
+                const contentType = response.headers.get("content-type");
+                if (!contentType || !contentType.includes("application/json")) {
+                    throw new Error("Server error: Received non-JSON response. Check Vercel deployment logs.");
+                }
 
                 const data = await response.json();
                 if (!response.ok || !data.success) {
@@ -424,7 +424,6 @@
             }
         }
 
-        // Chatbot Functionality
         function handleChatKeyDown(e) {
             if (e.key === 'Enter') sendChatMessage();
         }
@@ -505,7 +504,6 @@
             `;
         }
 
-        // Niche Idea Generator
         async function generateContentIdeas() {
             const platform = document.getElementById('gen-platform').value;
             const niche = document.getElementById('gen-niche').value;
@@ -519,8 +517,7 @@
             resultsEl.innerHTML = '';
             submitBtn.disabled = true;
 
-            const prompt = `Generate 3 distinct, high-impact viral content concepts for platform: "${platform}", niche: "${niche}", and tone: "${tone}". 
-            Format the output strictly as valid JSON containing an array of objects with keys: "title", "hook", "outline" (array of steps), and "cta". Do not include markdown code ticks inside the text string if possible, just structured content representation.`;
+            const prompt = `Generate 3 distinct, high-impact viral content concepts for platform: "${platform}", niche: "${niche}", and tone: "${tone}". Format output clearly.`;
 
             try {
                 const systemPrompt = "You are an expert viral content generator. Return clean structured text blueprints.";
@@ -539,8 +536,6 @@
 
         function renderGeneratedIdeas(rawText) {
             const resultsEl = document.getElementById('gen-results');
-            
-            // Fallback display card if parsing structured JSON proves tough
             const cardId = 'idea-' + Date.now();
             const safeContent = escapeHtml(rawText);
 
@@ -558,7 +553,6 @@
             `;
         }
 
-        // Saved Vault Operations
         function saveIdeaToVault(cardId) {
             const contentEl = document.getElementById(`content-${cardId}`);
             if (!contentEl) return;
