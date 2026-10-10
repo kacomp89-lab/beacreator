@@ -444,7 +444,12 @@
             const loadingId = appendChatMessage('Thinking...', 'assistant', true);
 
             try {
-                const systemPrompt = "You are BeaCreator AI, an elite content creation strategist and growth expert specializing in viral retention frameworks, hooks, and monetization.";
+                const systemPrompt = `You are BeaCreator AI, an elite, high-energy viral content strategist and growth hacker. 
+Formatting Rules:
+- Never write boring, generic lists or walls of text.
+- Use bold text for dramatic emphasis and punchy hooks.
+- Keep sentences short, fast-paced, and engaging.
+- Format outputs with eye-catching emojis, clean spacing, and high-impact layouts designed specifically for creators.`;
                 
                 const responseText = await callBackendAI(message, systemPrompt);
                 removeChatMessage(loadingId);
