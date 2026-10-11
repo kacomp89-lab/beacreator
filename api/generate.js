@@ -13,7 +13,6 @@ export default async function handler(req, res) {
   // Build parts array (supports text + optional image payload for CTR simulator)
   const parts = [{ text: prompt }];
   if (imageBase64) {
-    // Extract base64 data and mime type if uploaded as data url
     const matches = imageBase64.match(/^data:(.+);base64,(.+)$/);
     if (matches && matches.length === 3) {
       parts.push({
@@ -30,7 +29,8 @@ export default async function handler(req, res) {
 
   while (attempt < maxRetries) {
     try {
-      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
+      // Updated to use the active gemini-3.8-flash endpoint
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=${apiKey}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -51,7 +51,7 @@ export default async function handler(req, res) {
       if (!response.ok) {
         const errorMsg = data.error?.message || "Gemini API error";
         if (response.status === 429 || errorMsg.includes("quota")) {
-          throw new Error("You have exceeded your API quota limit. Please wait a moment or upgrade your Google AI Studio plan.");
+          throw new Error("You have exceeded your API quota limit. Please wait a moment or check your Google AI Studio plan.");
         }
         throw new Error(errorMsg);
       }
