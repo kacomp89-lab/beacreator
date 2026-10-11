@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up - BeaCreator AI Studio</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f5f3ff',
+                            100: '#ede9fe',
+                            500: '#8b5cf6',
+                            600: '#7c3aed',
+                            700: '#6d28d9',
+                            900: '#4c1d95',
+                            neon: '#a855f7',
+                            glow: '#c084fc',
+                            darkbg: '#09090b',
+                            cardbg: '#121216',
+                            bordercol: '#27272a'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #09090b;
+            color: #f4f4f5;
+        }
+        .neon-glow {
+            box-shadow: 0 0 25px -5px rgba(168, 85, 247, 0.35);
+        }
+        .neon-glow-sm {
+            box-shadow: 0 0 12px -2px rgba(139, 92, 246, 0.3);
+        }
+        .glass-panel {
+            background: rgba(18, 18, 22, 0.75);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(39, 39, 42, 0.6);
+        }
+    </style>
+</head>
+<body class="bg-[#09090b] text-zinc-100 min-h-screen flex items-center justify-center p-4 selection:bg-purple-500 selection:text-white">
+
+    <div class="glass-panel w-full max-w-md p-8 rounded-3xl border border-purple-500/30 neon-glow space-y-6 relative overflow-hidden">
+        <div class="absolute -top-12 -right-12 w-40 h-40 bg-purple-600/20 rounded-full blur-3xl pointer-events-none"></div>
+        
+        <div class="text-center space-y-2">
+            <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-purple-600 via-indigo-600 to-pink-500 flex items-center justify-center neon-glow-sm mx-auto">
+                <i class="fa-solid fa-wand-magic-sparkles text-white text-xl"></i>
+            </div>
+            <h2 class="text-2xl font-extrabold text-white tracking-tight">Join BeaCreator</h2>
+            <p class="text-xs text-zinc-400">Enter your details to launch your AI content studio.</p>
+        </div>
+
+        <!-- Email & Name Form -->
+        <form onsubmit="handleSignup(event)" class="space-y-4">
+            <div class="space-y-1.5">
+                <label class="text-xs font-semibold text-zinc-300">Your Name</label>
+                <input type="text" id="signup-name" required placeholder="e.g., Alex Creator" class="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-purple-500">
+            </div>
+            <div class="space-y-1.5">
+                <label class="text-xs font-semibold text-zinc-300">Email Address</label>
+                <input type="email" id="signup-email" required placeholder="creator@example.com" class="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-purple-500">
+            </div>
+            <button type="submit" class="w-full py-3 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-sm transition-all shadow-lg shadow-purple-600/30 flex items-center justify-center space-x-2">
+                <span>Create Account</span>
+                <i class="fa-solid fa-arrow-right text-xs"></i>
+            </button>
+        </form>
+
+        <div class="flex items-center my-4">
+            <div class="flex-1 border-t border-zinc-800"></div>
+            <span class="px-3 text-[11px] font-semibold text-zinc-500 uppercase tracking-wider">Or</span>
+            <div class="flex-1 border-t border-zinc-800"></div>
+        </div>
+
+        <!-- Google Sign Up Button -->
+        <button onclick="signupWithGoogle()" class="w-full py-3 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-white font-semibold text-sm transition-all flex items-center justify-center space-x-3 shadow-sm">
+            <i class="fa-brands fa-google text-purple-400 text-base"></i>
+            <span>Sign up with Google</span>
+        </button>
+    </div>
+
+    <script>
+        const GOOGLE_CLIENT_ID = "YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com"; // Replace with your client ID
+
+        function handleSignup(e) {
+            e.preventDefault();
+            const name = document.getElementById('signup-name').value.trim();
+            const email = document.getElementById('signup-email').value.trim();
+
+            if (!name || !email) return;
+
+            localStorage.setItem('beacreator_user_name', name);
+            localStorage.setItem('beacreator_user_email', email);
+
+            // Redirect back to main index.html studio app
+            window.location.href = "index.html";
+        }
+
+        function signupWithGoogle() {
+            const redirectUri = window.location.origin + "/index.html";
+            const oauthUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${GOOGLE_CLIENT_ID}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=token&scope=https://www.googleapis.com/auth/youtube.readonly+https://www.googleapis.com/auth/userinfo.profile+https://www.googleapis.com/auth/userinfo.email`;
+            window.location.href = oauthUrl;
+        }
+    </script>
+</body>
+</html>
