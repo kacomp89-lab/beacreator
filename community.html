@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en" class="dark">
 <head>
@@ -155,10 +156,10 @@
         const SUPABASE_URL = "https://kdanylytvxsktgosvgjw.supabase.co";
         const SUPABASE_ANON_KEY = "sb_publishable_bhk8btpWpfdFtgxnkV05-w_rbkKl3Ye";
 
-        let supabase = null;
+        let supabaseClient = null;
         try {
-            if (window.supabase && SUPABASE_URL !== "https://kdanylytvxsktgosvgjw.supabase.co") {
-                supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            if (window.supabase && SUPABASE_URL && SUPABASE_ANON_KEY) {
+                supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
             }
         } catch (e) {
             console.error("Supabase init error:", e);
@@ -182,7 +183,7 @@
 
         async function handleGlobalUpload(event) {
             event.preventDefault();
-            if (!supabase) {
+            if (!supabaseClient) {
                 alert("Please add your Supabase URL and Anon Key in the script before uploading!");
                 return;
             }
@@ -201,19 +202,19 @@
 
             try {
                 const fileName = `${Date.now()}_${fileInput.name.replace(/[^a-zA-Z0-9._-]/g, "")}`;
-                const { data: storageData, error: storageError } = await supabase.storage
+                const { data: storageData, error: storageError } = await supabaseClient.storage
                     .from('videos')
                     .upload(fileName, fileInput);
 
                 if (storageError) throw new Error("Storage Error: " + storageError.message);
 
-                const { data: publicUrlData } = supabase.storage
+                const { data: publicUrlData } = supabaseClient.storage
                     .from('videos')
                     .getPublicUrl(fileName);
 
                 const videoUrl = publicUrlData.publicUrl;
 
-                const { error: dbError } = await supabase.from('videos').insert([
+                const { error: dbError } = await supabaseClient.from('videos').insert([
                     { title, description: desc, video_url: videoUrl, format: type, author, likes: 0 }
                 ]);
 
@@ -248,13 +249,13 @@
             const feed = document.getElementById('video-feed');
             feed.innerHTML = `<div class="col-span-full py-20 text-center text-zinc-400 text-sm animate-pulse"><i class="fa-solid fa-spinner fa-spin mr-2"></i> Loading global community feed...</div>`;
 
-            if (!supabase) {
+            if (!supabaseClient) {
                 feed.innerHTML = `<div class="col-span-full py-16 text-center text-amber-400 text-sm glass-panel rounded-3xl border border-amber-500/30 p-6 space-y-2"><strong>Supabase Not Connected</strong><p class="text-xs text-zinc-400">Please paste your Supabase Project URL and Anon Key at the top of the script section to view global community videos.</p></div>`;
                 return;
             }
 
             try {
-                let query = supabase.from('videos').select('*').order('created_at', { ascending: false });
+                let query = supabaseClient.from('videos').select('*').order('created_at', { ascending: false });
                 if (filter !== 'all') {
                     query = query.eq('format', filter);
                 }
@@ -297,12 +298,12 @@
         }
 
         async function likeVideo(id, currentLikes) {
-            if (!supabase) return;
+            if (!supabaseClient) return;
             const newLikes = currentLikes + 1;
             const likeSpan = document.getElementById(`like-count-${id}`);
             if (likeSpan) likeSpan.innerText = newLikes;
 
-            await supabase.from('videos').update({ likes: newLikes }).eq('id', id);
+            await supabaseClient.from('videos').update({ likes: newLikes }).eq('id', id);
         }
 
         function escapeHtml(str) {
@@ -311,3 +312,7 @@
     </script>
 </body>
 </html>
+  
+
+
+
