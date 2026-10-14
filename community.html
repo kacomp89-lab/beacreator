@@ -97,7 +97,7 @@
                     <span>Creator Showcase & Feedback Arena</span>
                 </div>
                 <h1 class="text-2xl lg:text-4xl font-extrabold text-white">Explore Creator Shorts & Long Videos</h1>
-                <p class="text-zinc-400 text-xs lg:text-sm">Share your original video files and stream what creators are building worldwide.</p>
+                <p class="text-zinc-400 text-xs lg:text-sm">Upload original MP4 video files to share globally with creators worldwide.</p>
             </div>
         </div>
 
@@ -116,7 +116,7 @@
     <div id="upload-modal" class="fixed inset-0 z-50 bg-[#09090b]/80 backdrop-blur-md flex items-center justify-center p-4 hidden">
         <div class="glass-panel w-full max-w-lg p-6 rounded-3xl border border-purple-500/30 neon-glow space-y-4 relative">
             <div class="flex items-center justify-between">
-                <h3 class="text-lg font-bold text-white"><i class="fa-solid fa-video text-purple-400 mr-2"></i>Upload Video</h3>
+                <h3 class="text-lg font-bold text-white"><i class="fa-solid fa-video text-purple-400 mr-2"></i>Upload Global Video</h3>
                 <button onclick="closeUploadModal()" class="text-zinc-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
 
@@ -129,8 +129,8 @@
                     <div class="space-y-1.5">
                         <label class="text-xs font-semibold text-zinc-300">Format</label>
                         <select id="vid-type" class="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-purple-500">
-                            <option value="short">Short / Reel (Vertical)</option>
-                            <option value="long">Long Video (Horizontal)</option>
+                            <option value="short">Short / Reel (Vertical 9:16)</option>
+                            <option value="long">Long Video (Horizontal 16:9)</option>
                         </select>
                     </div>
                     <div class="space-y-1.5">
@@ -151,13 +151,13 @@
 
     <!-- SCRIPT -->
     <script>
-        // PASTE YOUR SUPABASE URL AND ANON KEY HERE
+        // PASTE YOUR SUPABASE PROJECT URL AND ANON KEY HERE
         const SUPABASE_URL = "https://kdanylytvxsktgosvgjw.supabase.co";
         const SUPABASE_ANON_KEY = "sb_publishable_bhk8btpWpfdFtgxnkV05-w_rbkKl3Ye";
 
         let supabase = null;
         try {
-            if (window.supabase && SUPABASE_URL !== "YOUR_SUPABASE_PROJECT_URL") {
+            if (window.supabase && SUPABASE_URL !== "https://kdanylytvxsktgosvgjw.supabase.co") {
                 supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
             }
         } catch (e) {
