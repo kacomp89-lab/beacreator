@@ -3,10 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BeaCreator Video Stream - Creator Network</title>
+    <title>BeaCreator Video Stream - Global Creator Network</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Supabase JS Client CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
         tailwind.config = {
             darkMode: 'class',
@@ -77,7 +79,7 @@
             </div>
             <div>
                 <span class="text-xl font-extrabold tracking-tight bg-gradient-to-r from-white via-purple-200 to-purple-400 bg-clip-text text-transparent">BeaCreator Stream</span>
-                <span class="hidden sm:inline-block ml-2 px-2 py-0.5 text-[10px] font-semibold bg-purple-950/80 text-purple-300 rounded-full border border-purple-800/50">Independent Network</span>
+                <span class="hidden sm:inline-block ml-2 px-2 py-0.5 text-[10px] font-semibold bg-purple-950/80 text-purple-300 rounded-full border border-purple-800/50">Global Network</span>
             </div>
         </div>
 
@@ -88,7 +90,7 @@
             </button>
             <button class="px-4 py-2 rounded-xl text-xs font-semibold bg-purple-600 text-white shadow-lg shadow-purple-600/30 flex items-center space-x-2">
                 <i class="fa-solid fa-video"></i>
-                <span>Video Stream</span>
+                <span>Global Stream</span>
             </button>
         </nav>
 
@@ -102,10 +104,10 @@
 
     <!-- CONTENT FEED -->
     <main class="flex-1 max-w-6xl w-full mx-auto p-4 lg:p-6 pb-28 space-y-6">
-        <div class="flex items-center justify-between border-b border-zinc-800 pb-4">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-800 pb-4">
             <div>
-                <h1 class="text-2xl font-extrabold text-white">Creator Video Stream</h1>
-                <p class="text-xs text-zinc-400">Watch and upload original shorts and long-form video concepts.</p>
+                <h1 class="text-2xl font-extrabold text-white">Global Creator Stream</h1>
+                <p class="text-xs text-zinc-400">Stream original shorts and long-form videos uploaded by creators worldwide.</p>
             </div>
             <div class="flex items-center space-x-2">
                 <button onclick="filterFeed('all')" id="filter-all" class="px-3 py-1.5 rounded-xl bg-purple-600 text-white text-xs font-bold transition-all">All</button>
@@ -122,11 +124,11 @@
     <div id="upload-modal" class="fixed inset-0 z-50 bg-[#09090b]/80 backdrop-blur-md flex items-center justify-center p-4 hidden">
         <div class="glass-panel w-full max-w-lg p-6 rounded-3xl border border-purple-500/30 neon-glow space-y-4 relative">
             <div class="flex items-center justify-between">
-                <h3 class="text-lg font-bold text-white"><i class="fa-solid fa-video text-purple-400 mr-2"></i>Upload Original Video</h3>
+                <h3 class="text-lg font-bold text-white"><i class="fa-solid fa-video text-purple-400 mr-2"></i>Upload to Global Stream</h3>
                 <button onclick="closeUploadModal()" class="text-zinc-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
 
-            <form onsubmit="handleNativeUpload(event)" class="space-y-4">
+            <form onsubmit="handleGlobalUpload(event)" class="space-y-4">
                 <div class="space-y-1.5">
                     <label class="text-xs font-semibold text-zinc-300">Video Title</label>
                     <input type="text" id="up-title" required placeholder="e.g., Behind the Scenes AI Workflow" class="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-purple-500">
@@ -148,19 +150,24 @@
                     <label class="text-xs font-semibold text-zinc-300">Description / Notes</label>
                     <textarea id="up-desc" rows="3" required placeholder="What is this video about..." class="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-purple-500 resize-none"></textarea>
                 </div>
-                <button type="submit" class="w-full py-3 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-sm transition-all shadow-lg shadow-purple-600/30">
-                    Publish Video
+                <button type="submit" id="upload-submit-btn" class="w-full py-3 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-sm transition-all shadow-lg shadow-purple-600/30 flex items-center justify-center space-x-2">
+                    <span>Publish Globally</span>
                 </button>
             </form>
         </div>
     </div>
 
-    <!-- SCRIPT -->
+    <!-- SUPABASE SCRIPT & APP LOGIC -->
     <script>
-        let nativeVideos = JSON.parse(localStorage.getItem('beacreator_native_videos') || '[]');
+        // REPLACE THESE WITH YOUR ACTUAL SUPABASE PROJECT URL AND ANON KEY
+        const SUPABASE_URL = "https://kdanylytvxsktgosvgjw.supabase.co";
+        const SUPABASE_ANON_KEY = "sb_publishable_bhk8btpWpfdFtgxnkV05-w_rbkKl3Ye";
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        let currentFilter = 'all';
 
         window.addEventListener('DOMContentLoaded', () => {
-            renderNativeFeed('all');
+            loadGlobalVideos('all');
         });
 
         function openUploadModal() {
@@ -171,80 +178,105 @@
             document.getElementById('upload-modal').classList.add('hidden');
         }
 
-        function handleNativeUpload(e) {
-            e.preventDefault();
+        async function handleGlobalUpload(event) {
+            event.preventDefault();
             const title = document.getElementById('up-title').value.trim();
             const type = document.getElementById('up-type').value;
             const fileInput = document.getElementById('up-file').files[0];
             const desc = document.getElementById('up-desc').value.trim();
             const author = localStorage.getItem('beacreator_user_name') || 'Creator';
+            const btn = document.getElementById('upload-submit-btn');
 
             if (!fileInput) return;
 
-            const reader = new FileReader();
-            reader.onload = function(uploadEvent) {
-                const videoDataUrl = uploadEvent.target.result;
+            btn.disabled = true;
+            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-2"></i> Uploading to Cloud...`;
 
-                const newVideo = {
-                    id: Date.now(),
-                    title,
-                    type,
-                    videoUrl: videoDataUrl,
-                    desc,
-                    author,
-                    likes: 1,
-                    date: new Date().toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
-                };
+            try {
+                // 1. Upload video file to Supabase Storage bucket 'videos'
+                const fileName = `${Date.now()}_${fileInput.name.replace(/[^a-zA-Z0-9._-]/g, "")}`;
+                const { data: storageData, error: storageError } = await supabase.storage
+                    .from('videos')
+                    .upload(fileName, fileInput);
 
-                nativeVideos.unshift(newVideo);
-                localStorage.setItem('beacreator_native_videos', JSON.stringify(nativeVideos));
+                if (storageError) throw new Error("Storage Error: " + storageError.message);
+
+                // 2. Get public HTTPS URL of the video file
+                const { data: publicUrlData } = supabase.storage
+                    .from('videos')
+                    .getPublicUrl(fileName);
+
+                const videoUrl = publicUrlData.publicUrl;
+
+                // 3. Save metadata record to Supabase database table 'videos'
+                const { error: dbError } = await supabase.from('videos').insert([
+                    { title, description: desc, video_url: videoUrl, format: type, author, likes: 0 }
+                ]);
+
+                if (dbError) throw new Error("Database Error: " + dbError.message);
+
+                btn.disabled = false;
+                btn.innerHTML = `<span>Publish Globally</span>`;
                 closeUploadModal();
-                renderNativeFeed('all');
-            };
-            reader.readAsDataURL(fileInput);
+                loadGlobalVideos(currentFilter);
+            } catch (error) {
+                alert(error.message);
+                btn.disabled = false;
+                btn.innerHTML = `<span>Publish Globally</span>`;
+            }
         }
 
         function filterFeed(type) {
+            currentFilter = type;
             ['all', 'short', 'long'].forEach(t => {
                 const btn = document.getElementById(`filter-${t}`);
                 if (btn) {
                     btn.className = t === type ? "px-3 py-1.5 rounded-xl bg-purple-600 text-white text-xs font-bold transition-all" : "px-3 py-1.5 rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-400 text-xs font-bold transition-all";
                 }
             });
-            renderNativeFeed(type);
+            loadGlobalVideos(type);
         }
 
-        function renderNativeFeed(filter) {
+        async function loadGlobalVideos(filter) {
             const feed = document.getElementById('native-video-feed');
-            let filtered = nativeVideos;
+            feed.innerHTML = `<div class="col-span-full py-20 text-center text-zinc-400 text-sm animate-pulse"><i class="fa-solid fa-spinner fa-spin mr-2"></i> Loading global creator stream...</div>`;
+
+            let query = supabase.from('videos').select('*').order('created_at', { ascending: false });
             if (filter !== 'all') {
-                filtered = nativeVideos.filter(v => v.type === filter);
+                query = query.eq('format', filter);
             }
 
-            if (filtered.length === 0) {
-                feed.innerHTML = `<div class="col-span-full py-20 text-center text-zinc-500 text-sm glass-panel rounded-3xl border border-zinc-800">No original videos uploaded yet. Click "Upload Video" to add your first short or long video!</div>`;
+            const { data: videos, error } = await query;
+
+            if (error) {
+                feed.innerHTML = `<div class="col-span-full py-16 text-center text-red-400 text-sm glass-panel rounded-3xl border border-red-500/30">Failed to load global stream: ${escapeHtml(error.message)}</div>`;
                 return;
             }
 
-            feed.innerHTML = filtered.map(v => `
+            if (!videos || videos.length === 0) {
+                feed.innerHTML = `<div class="col-span-full py-20 text-center text-zinc-500 text-sm glass-panel rounded-3xl border border-zinc-800">No original videos found in the global network. Be the first to upload!</div>`;
+                return;
+            }
+
+            feed.innerHTML = videos.map(v => `
                 <div class="glass-panel rounded-3xl border border-zinc-800 overflow-hidden flex flex-col space-y-3 group">
-                    <div class="relative w-full ${v.type === 'short' ? 'aspect-[9/16] max-h-96' : 'aspect-video'} bg-black flex items-center justify-center">
-                        <video src="${v.videoUrl}" controls class="w-full h-full object-contain"></video>
+                    <div class="relative w-full ${v.format === 'short' ? 'aspect-[9/16] max-h-96' : 'aspect-video'} bg-black flex items-center justify-center">
+                        <video src="${v.video_url}" controls preload="metadata" class="w-full h-full object-contain"></video>
                     </div>
                     <div class="p-5 space-y-2 flex-1 flex flex-col justify-between">
                         <div>
                             <div class="flex items-center justify-between text-xs text-zinc-500 mb-1">
-                                <span class="px-2 py-0.5 rounded-full bg-purple-500/10 text-purple-300 font-semibold uppercase text-[10px]">${v.type === 'short' ? 'Short' : 'Long Video'}</span>
+                                <span class="px-2 py-0.5 rounded-full bg-purple-500/10 text-purple-300 font-semibold uppercase text-[10px]">${v.format === 'short' ? 'Short' : 'Long Video'}</span>
                                 <span><i class="fa-solid fa-user mr-1"></i> ${escapeHtml(v.author)}</span>
                             </div>
                             <h3 class="text-base font-bold text-white">${escapeHtml(v.title)}</h3>
-                            <p class="text-xs text-zinc-400 line-clamp-2 mt-1">${escapeHtml(v.desc)}</p>
+                            <p class="text-xs text-zinc-400 line-clamp-2 mt-1">${escapeHtml(v.description || '')}</p>
                         </div>
                         <div class="flex items-center justify-between pt-3 border-t border-zinc-800/80 text-xs text-zinc-400">
-                            <span>${v.date}</span>
-                            <button onclick="likeVideo(${v.id})" class="flex items-center space-x-1 hover:text-purple-400 transition-colors">
+                            <span>${new Date(v.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</span>
+                            <button onclick="likeVideo(${v.id}, ${v.likes})" class="flex items-center space-x-1 hover:text-purple-400 transition-colors">
                                 <i class="fa-solid fa-heart text-purple-500"></i>
-                                <span class="font-bold text-white">${v.likes}</span>
+                                <span class="font-bold text-white" id="like-count-${v.id}">${v.likes || 0}</span>
                             </button>
                         </div>
                     </div>
@@ -252,13 +284,12 @@
             `).join('');
         }
 
-        function likeVideo(id) {
-            const vid = nativeVideos.find(v => v.id === id);
-            if (vid) {
-                vid.likes++;
-                localStorage.setItem('beacreator_native_videos', JSON.stringify(nativeVideos));
-                renderNativeFeed('all');
-            }
+        async function likeVideo(id, currentLikes) {
+            const newLikes = currentLikes + 1;
+            const likeSpan = document.getElementById(`like-count-${id}`);
+            if (likeSpan) likeSpan.innerText = newLikes;
+
+            await supabase.from('videos').update({ likes: newLikes }).eq('id', id);
         }
 
         function escapeHtml(str) {
