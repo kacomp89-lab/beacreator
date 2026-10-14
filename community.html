@@ -280,34 +280,3 @@
                                 </div>
                                 <h3 class="text-base font-bold text-white">${escapeHtml(v.title)}</h3>
                                 <p class="text-xs text-zinc-400 line-clamp-2 mt-1">${escapeHtml(v.description || '')}</p>
-                            </div>
-                            <div class="flex items-center justify-between pt-3 border-t border-zinc-800/80 text-xs text-zinc-400">
-                                <span>${new Date(v.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</span>
-                                <button onclick="likeVideo(${v.id}, ${v.likes || 0})" class="flex items-center space-x-1 hover:text-purple-400 transition-colors">
-                                    <i class="fa-solid fa-heart text-purple-500"></i>
-                                    <span class="font-bold text-white" id="like-count-${v.id}">${v.likes || 0}</span>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                `).join('');
-            } catch (err) {
-                feed.innerHTML = `<div class="col-span-full py-16 text-center text-red-400 text-sm glass-panel rounded-3xl border border-red-500/30">Error loading feed: ${escapeHtml(err.message)}</div>`;
-            }
-        }
-
-        async function likeVideo(id, currentLikes) {
-            if (!supabase) return;
-            const newLikes = currentLikes + 1;
-            const likeSpan = document.getElementById(`like-count-${id}`);
-            if (likeSpan) likeSpan.innerText = newLikes;
-
-            await supabase.from('videos').update({ likes: newLikes }).eq('id', id);
-        }
-
-        function escapeHtml(str) {
-            return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
-        }
-    </script>
-</body>
-</html>
