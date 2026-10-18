@@ -43,17 +43,12 @@
             color: #f4f4f5;
             overflow-x: hidden;
         }
-        /* Lightweight shadows instead of GPU-heavy blurs for low-end devices */
-        .neon-glow {
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
-        }
-        .neon-glow-sm {
-            box-shadow: 0 2px 8px rgba(139, 92, 246, 0.25);
-        }
-        /* Solid high-opacity background avoids expensive backdrop-filter repaints */
+        /* Low-end device friendly shadows & surfaces */
+        .neon-glow { box-shadow: 0 4px 16px rgba(0, 0, 0, 0.45); }
+        .neon-glow-sm { box-shadow: 0 2px 8px rgba(139, 92, 246, 0.25); }
         .glass-panel {
             background: rgba(18, 18, 22, 0.96);
-            border: 1px solid rgba(39, 39, 42, 0.8);
+            border: 1px solid rgba(39, 39, 42, 0.85);
         }
 
         .feed-columns {
@@ -62,9 +57,7 @@
             gap: 1.5rem;
             align-items: start;
         }
-        .feed-columns.single-col {
-            grid-template-columns: minmax(0, 1fr);
-        }
+        .feed-columns.single-col { grid-template-columns: minmax(0, 1fr); }
         .feed-column { min-width: 0; }
         .column-heading {
             display: flex;
@@ -105,10 +98,10 @@
         }
         .short-gradient {
             position: absolute;
-            inset: 40% 0 0;
+            inset: 38% 0 0;
             z-index: 1;
             pointer-events: none;
-            background: linear-gradient(transparent, rgba(0, 0, 0, .88));
+            background: linear-gradient(transparent, rgba(0, 0, 0, .9));
         }
         .short-meta {
             position: absolute;
@@ -125,7 +118,7 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 18px;
+            gap: 16px;
         }
         .short-action {
             width: 48px;
@@ -141,7 +134,1259 @@
             color: #fff;
             transition: background-color .15s;
         }
-        .short-action:hover:not(:disabled) {
-            background: rgba(124, 58, 237, .9);
+        .short-action:hover:not(:disabled) { background: rgba(124, 58, 237, .9); }
+        .short-action.is-liked {
+            background: rgba(219, 39, 119, 0.25);
+            border-color: rgba(244, 114, 182, 0.6);
+            cursor: default;
         }
-        .short-action.is-liked
+        .short-action span { font-size: 10px; font-weight: 800; }
+        .video-title-button {
+            text-align: left;
+            width: 100%;
+            font-weight: 800;
+            color: #fff;
+            line-height: 1.35;
+        }
+        .video-title-button:hover { color: #d8b4fe; }
+        .video-description {
+            white-space: pre-wrap;
+            overflow-wrap: anywhere;
+        }
+        .long-list {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+        .long-card {
+            overflow: hidden;
+            contain: content;
+            border: 1px solid rgba(63, 63, 70, .8);
+            border-radius: 20px;
+            background: #121216;
+        }
+        .long-card video {
+            display: block;
+            width: 100%;
+            aspect-ratio: 16/9;
+            background: #000;
+            object-fit: contain;
+        }
+        .empty-state {
+            border: 1px solid #27272a;
+            border-radius: 20px;
+            padding: 40px 18px;
+            text-align: center;
+            color: #a1a1aa;
+        }
+        .creator-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 4px 10px 4px 4px;
+            border-radius: 999px;
+            background: rgba(24, 24, 27, 0.85);
+            border: 1px solid rgba(168, 85, 247, 0.3);
+            transition: border-color 0.15s, background-color 0.15s;
+            cursor: pointer;
+        }
+        .creator-chip:hover {
+            border-color: #a855f7;
+            background: rgba(88, 28, 135, 0.45);
+        }
+        @media (max-width: 850px) {
+            .feed-columns { grid-template-columns: minmax(0, 1fr); }
+            .shorts-scroll { max-height: 75vh; }
+            .short-card {
+                height: min(72vh, 700px);
+                min-height: 420px;
+                max-width: 460px;
+                width: 100%;
+                margin-inline: auto;
+            }
+        }
+        @media (max-width: 480px) {
+            .short-card {
+                min-height: 420px;
+                height: 68vh;
+                border-radius: 16px;
+            }
+            .short-meta { left: 12px; right: 64px; bottom: 14px; }
+            .short-actions { right: 8px; bottom: 18px; }
+        }
+    </style>
+</head>
+<body class="bg-[#09090b] text-zinc-100 min-h-screen flex flex-col selection:bg-purple-500 selection:text-white">
+
+    <!-- HEADER -->
+    <header class="sticky top-0 z-50 glass-panel border-b border-zinc-800/80 px-4 lg:px-8 py-3 flex items-center justify-between gap-2">
+        <div class="flex items-center space-x-3 cursor-pointer" onclick="showMainFeed()">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-purple-600 via-indigo-600 to-pink-500 flex items-center justify-center neon-glow-sm">
+                <i class="fa-solid fa-wand-magic-sparkles text-white text-lg"></i>
+            </div>
+            <div>
+                <span class="text-xl font-extrabold tracking-tight bg-gradient-to-r from-white via-purple-200 to-purple-400 bg-clip-text text-transparent">BeaCreator</span>
+                <span class="hidden sm:inline-block ml-2 px-2 py-0.5 text-[10px] font-semibold bg-purple-950/80 text-purple-300 rounded-full border border-purple-800/50">Community Hub</span>
+            </div>
+        </div>
+
+        <nav class="hidden md:flex items-center space-x-1 bg-zinc-900 p-1.5 rounded-2xl border border-zinc-800">
+            <button onclick="window.location.href='index.html'" class="px-4 py-2 rounded-xl text-xs font-semibold text-zinc-400 hover:text-white transition-colors flex items-center space-x-2">
+                <i class="fa-solid fa-house"></i>
+                <span>Studio</span>
+            </button>
+            <button id="nav-feed-btn" onclick="showMainFeed()" class="px-4 py-2 rounded-xl text-xs font-semibold bg-purple-600 text-white flex items-center space-x-2">
+                <i class="fa-solid fa-users"></i>
+                <span>Community Feed</span>
+            </button>
+            <button id="nav-my-channel-btn" onclick="openMyChannelOrSetup()" class="px-4 py-2 rounded-xl text-xs font-semibold text-zinc-400 hover:text-white transition-colors flex items-center space-x-2">
+                <i class="fa-solid fa-tv"></i>
+                <span>My Channel</span>
+            </button>
+        </nav>
+
+        <!-- Right Actions: Channel Setup/Profile Button + Upload Video -->
+        <div class="flex items-center space-x-2 sm:space-x-3">
+            <button id="header-profile-btn" onclick="openProfileModal()" class="px-3 py-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-200 font-bold text-xs transition-colors flex items-center space-x-2">
+                <img id="header-avatar-img" src="" alt="Avatar" class="w-6 h-6 rounded-full object-cover hidden border border-purple-500">
+                <i id="header-avatar-icon" class="fa-solid fa-user-pen text-purple-400"></i>
+                <span id="header-username-text">Create Channel</span>
+            </button>
+
+            <button onclick="openUploadModal()" class="px-3.5 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs transition-colors flex items-center space-x-2">
+                <i class="fa-solid fa-plus"></i>
+                <span class="hidden sm:inline">Upload Video</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- ========================================== -->
+    <!-- VIEW 1: MAIN COMMUNITY FEED                -->
+    <!-- ========================================== -->
+    <main id="feed-view" class="flex-1 max-w-6xl w-full mx-auto p-4 lg:p-6 pb-28 space-y-6">
+        <div class="relative overflow-hidden rounded-3xl bg-gradient-to-r from-purple-950/60 via-indigo-950/40 to-zinc-900 border border-purple-500/20 p-6 lg:p-8 neon-glow flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+            <div class="max-w-2xl space-y-2">
+                <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/30 text-purple-300 text-xs font-semibold">
+                    <i class="fa-solid fa-fire text-purple-400"></i>
+                    <span>Creator Showcase & Channels</span>
+                </div>
+                <h1 class="text-2xl lg:text-4xl font-extrabold text-white">Explore Creator Shorts & Channels</h1>
+                <p class="text-zinc-400 text-xs lg:text-sm">Click any creator's @username below a video to visit their channel, read their bio, and follow them.</p>
+            </div>
+            <div class="flex flex-wrap gap-2">
+                <button onclick="openProfileModal()" class="px-4 py-2.5 rounded-xl bg-zinc-900/90 hover:bg-zinc-800 border border-purple-500/40 text-purple-200 text-xs font-bold flex items-center gap-2">
+                    <i class="fa-solid fa-id-badge text-purple-400"></i>
+                    <span>Customize Channel & Bio</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Feed filters -->
+        <div class="flex flex-wrap items-center gap-2 border-b border-zinc-800 pb-3">
+            <button onclick="filterVideos('all')" id="filter-all" class="px-4 py-2 rounded-xl bg-purple-600 text-white text-xs font-bold transition-colors"><i class="fa-solid fa-layer-group mr-2"></i>All Videos</button>
+            <button onclick="filterVideos('short')" id="filter-short" class="px-4 py-2 rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white text-xs font-bold transition-colors"><i class="fa-solid fa-mobile-screen mr-2"></i>Shorts / Reels</button>
+            <button onclick="filterVideos('long')" id="filter-long" class="px-4 py-2 rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white text-xs font-bold transition-colors"><i class="fa-solid fa-tv mr-2"></i>Long Videos</button>
+        </div>
+
+        <!-- Separate Shorts and Long Video columns -->
+        <div id="feed-columns" class="feed-columns">
+            <section id="shorts-column" class="feed-column">
+                <div class="column-heading">
+                    <h2 class="text-lg font-extrabold text-white"><i class="fa-solid fa-mobile-screen-button text-purple-400 mr-2"></i>Shorts</h2>
+                    <span class="text-xs text-zinc-500">Scroll vertically</span>
+                </div>
+                <div id="shorts-feed" class="shorts-scroll"><div class="empty-state">Loading Shorts...</div></div>
+            </section>
+            <section id="long-column" class="feed-column">
+                <div class="column-heading">
+                    <h2 class="text-lg font-extrabold text-white"><i class="fa-solid fa-clapperboard text-purple-400 mr-2"></i>Long Videos</h2>
+                    <span class="text-xs text-zinc-500">Landscape videos</span>
+                </div>
+                <div id="long-feed" class="long-list"><div class="empty-state">Loading long videos...</div></div>
+            </section>
+        </div>
+    </main>
+
+    <!-- ========================================== -->
+    <!-- VIEW 2: YOUTUBE-STYLE CREATOR CHANNEL PAGE -->
+    <!-- ========================================== -->
+    <section id="channel-view" class="flex-1 max-w-6xl w-full mx-auto p-4 lg:p-6 pb-28 space-y-6 hidden">
+        <!-- Back to Feed Bar -->
+        <div class="flex items-center justify-between">
+            <button onclick="showMainFeed()" class="px-3.5 py-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-xs font-bold text-zinc-300 flex items-center gap-2">
+                <i class="fa-solid fa-arrow-left text-purple-400"></i>
+                <span>Back to Global Feed</span>
+            </button>
+            <button id="channel-edit-own-btn" onclick="openProfileModal()" class="hidden px-3.5 py-2 rounded-xl bg-purple-600/20 border border-purple-500/40 text-purple-300 hover:bg-purple-600/30 text-xs font-bold flex items-center gap-2">
+                <i class="fa-solid fa-pen"></i>
+                <span>Edit My Channel</span>
+            </button>
+        </div>
+
+        <!-- YouTube-Style Channel Banner & Header -->
+        <div class="rounded-3xl overflow-hidden border border-zinc-800 bg-[#121216] neon-glow">
+            <!-- Banner -->
+            <div class="h-32 sm:h-44 bg-gradient-to-r from-purple-900 via-indigo-900 to-pink-900 relative">
+                <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.12),transparent_60%)]"></div>
+            </div>
+
+            <!-- Channel Info Bar -->
+            <div class="p-5 sm:p-8 -mt-12 sm:-mt-14 relative flex flex-col sm:flex-row sm:items-end justify-between gap-5">
+                <div class="flex flex-col sm:flex-row sm:items-end gap-4 sm:gap-5">
+                    <div id="channel-logo-wrapper" class="w-24 h-24 sm:w-28 sm:h-28 rounded-full border-4 border-[#121216] bg-zinc-800 overflow-hidden flex items-center justify-center shrink-0 shadow-xl">
+                        <!-- Populated dynamically -->
+                    </div>
+                    <div class="space-y-1.5">
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <h1 id="channel-display-title" class="text-2xl sm:text-3xl font-extrabold text-white">@Creator</h1>
+                            <span class="px-2.5 py-0.5 text-[11px] font-bold rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30"><i class="fa-solid fa-circle-check mr-1"></i>Creator</span>
+                        </div>
+                        <div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-zinc-400 font-semibold">
+                            <span><strong id="channel-followers-count" class="text-white">0</strong> Followers</span>
+                            <span>·</span>
+                            <span><strong id="channel-videos-count" class="text-white">0</strong> Videos</span>
+                            <span>·</span>
+                            <span><strong id="channel-likes-count" class="text-white">0</strong> Total Likes</span>
+                        </div>
+                        <p id="channel-short-bio" class="text-xs sm:text-sm text-zinc-300 max-w-2xl pt-1"></p>
+                    </div>
+                </div>
+
+                <!-- Follow / Subscribe Action -->
+                <div class="flex items-center gap-3">
+                    <button id="channel-follow-btn" onclick="toggleFollowCurrentChannel()" class="px-6 py-3 rounded-full font-extrabold text-xs sm:text-sm transition-colors flex items-center gap-2 bg-white text-black hover:bg-zinc-200">
+                        <i class="fa-solid fa-user-plus"></i>
+                        <span>Follow Channel</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Channel Navigation Tabs -->
+            <div class="px-5 sm:px-8 border-t border-zinc-800/80 flex items-center gap-2 overflow-x-auto py-2.5">
+                <button onclick="switchChannelTab('videos')" id="ch-tab-videos" class="px-4 py-2 rounded-xl text-xs font-bold bg-purple-600 text-white shrink-0">
+                    <i class="fa-solid fa-play mr-1.5"></i>Uploads
+                </button>
+                <button onclick="switchChannelTab('followers')" id="ch-tab-followers" class="px-4 py-2 rounded-xl text-xs font-bold bg-zinc-900 text-zinc-400 hover:text-white shrink-0">
+                    <i class="fa-solid fa-users mr-1.5"></i>Who Followed (<span id="ch-tab-followers-badge">0</span>)
+                </button>
+                <button onclick="switchChannelTab('about')" id="ch-tab-about" class="px-4 py-2 rounded-xl text-xs font-bold bg-zinc-900 text-zinc-400 hover:text-white shrink-0">
+                    <i class="fa-solid fa-circle-info mr-1.5"></i>About Channel
+                </button>
+            </div>
+        </div>
+
+        <!-- TAB 1: Channel Uploads (Shorts + Long Videos) -->
+        <div id="channel-panel-videos" class="space-y-6">
+            <div class="feed-columns">
+                <div class="feed-column">
+                    <div class="column-heading">
+                        <h3 class="text-base font-extrabold text-white"><i class="fa-solid fa-mobile-screen-button text-purple-400 mr-2"></i>Channel Shorts</h3>
+                    </div>
+                    <div id="channel-shorts-feed" class="shorts-scroll"></div>
+                </div>
+                <div class="feed-column">
+                    <div class="column-heading">
+                        <h3 class="text-base font-extrabold text-white"><i class="fa-solid fa-clapperboard text-purple-400 mr-2"></i>Channel Long Videos</h3>
+                    </div>
+                    <div id="channel-long-feed" class="long-list"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 2: Followers List ("Who Followed This Channel") -->
+        <div id="channel-panel-followers" class="hidden">
+            <div class="glass-panel rounded-3xl p-6 space-y-4">
+                <div class="flex items-center justify-between border-b border-zinc-800 pb-3">
+                    <div>
+                        <h3 class="text-lg font-extrabold text-white"><i class="fa-solid fa-user-check text-purple-400 mr-2"></i>Channel Followers</h3>
+                        <p class="text-xs text-zinc-400">Click any follower below to visit their creator channel.</p>
+                    </div>
+                </div>
+                <div id="channel-followers-list" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                    <!-- Populated dynamically -->
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 3: About Yourself Section -->
+        <div id="channel-panel-about" class="hidden">
+            <div class="glass-panel rounded-3xl p-6 space-y-4">
+                <h3 class="text-lg font-extrabold text-white border-b border-zinc-800 pb-3"><i class="fa-solid fa-address-card text-purple-400 mr-2"></i>About This Creator</h3>
+                <div class="space-y-2">
+                    <div class="text-xs uppercase tracking-wider text-zinc-500 font-bold">Tagline / Bio</div>
+                    <p id="channel-about-bio" class="text-sm text-zinc-200"></p>
+                </div>
+                <div class="space-y-2 pt-2">
+                    <div class="text-xs uppercase tracking-wider text-zinc-500 font-bold">About Yourself & Channel Details</div>
+                    <p id="channel-about-full" class="text-sm text-zinc-300 whitespace-pre-wrap leading-relaxed"></p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- MODAL 1: CREATE / EDIT CHANNEL PROFILE     -->
+    <!-- ========================================== -->
+    <div id="profile-modal" class="fixed inset-0 z-50 bg-black/85 flex items-center justify-center p-4 hidden overflow-y-auto">
+        <div class="glass-panel w-full max-w-lg p-6 rounded-3xl border border-purple-500/30 neon-glow space-y-4 relative my-8">
+            <div class="flex items-center justify-between">
+                <h3 class="text-lg font-bold text-white"><i class="fa-solid fa-id-card-clip text-purple-400 mr-2"></i>Setup Your Creator Channel</h3>
+                <button onclick="closeProfileModal()" class="text-zinc-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+
+            <form onsubmit="handleSaveProfile(event)" class="space-y-4">
+                <!-- Channel Logo Picker -->
+                <div class="flex items-center gap-4 p-3 rounded-2xl bg-zinc-900/90 border border-zinc-800">
+                    <div id="profile-preview-box" class="w-16 h-16 rounded-full bg-purple-900/40 border-2 border-purple-500 flex items-center justify-center overflow-hidden shrink-0">
+                        <img id="profile-logo-preview" src="" alt="Preview" class="w-full h-full object-cover hidden">
+                        <i id="profile-logo-placeholder" class="fa-solid fa-camera text-purple-300 text-xl"></i>
+                    </div>
+                    <div class="flex-1 space-y-1">
+                        <label class="text-xs font-bold text-zinc-200 block">Channel Logo Image</label>
+                        <input type="file" id="profile-logo-input" accept="image/*" onchange="previewChannelLogo(event)" class="w-full text-xs text-zinc-400 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-purple-600 file:text-white file:font-semibold">
+                        <p class="text-[11px] text-zinc-500">Auto-compressed to a crisp circular avatar.</p>
+                    </div>
+                </div>
+
+                <!-- Username -->
+                <div class="space-y-1.5">
+                    <label class="text-xs font-semibold text-zinc-300">Channel Username (Unique Handle)</label>
+                    <div class="relative">
+                        <span class="absolute left-3.5 top-3 text-zinc-400 text-sm font-bold">@</span>
+                        <input type="text" id="profile-username" required maxlength="32" placeholder="yourchannelname" class="w-full bg-zinc-900 border border-zinc-800 rounded-xl pl-8 pr-4 py-3 text-sm text-white focus:outline-none focus:border-purple-500">
+                    </div>
+                </div>
+
+                <!-- Short Bio -->
+                <div class="space-y-1.5">
+                    <label class="text-xs font-semibold text-zinc-300">Short Bio (Shown under channel header)</label>
+                    <input type="text" id="profile-bio" maxlength="120" placeholder="e.g., Daily Tech Shorts & Filmmaking Breakdowns" class="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-purple-500">
+                </div>
+
+                <!-- About Yourself -->
+                <div class="space-y-1.5">
+                    <label class="text-xs font-semibold text-zinc-300">About Yourself (Full Channel Story, Gear & Links)</label>
+                    <textarea id="profile-about" rows="4" maxlength="800" placeholder="Tell viewers about yourself, your editing software, upload schedule, and goals..." class="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-purple-500 resize-none"></textarea>
+                </div>
+
+                <div class="flex items-center gap-3 pt-1">
+                    <button type="submit" id="save-profile-btn" class="flex-1 py-3 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-sm transition-colors">
+                        Save Channel Profile
+                    </button>
+                    <button type="button" onclick="viewMySavedChannel()" class="px-4 py-3 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-200 font-bold text-xs">
+                        View Channel
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- MODAL 2: UPLOAD VIDEO                      -->
+    <!-- ========================================== -->
+    <div id="upload-modal" class="fixed inset-0 z-50 bg-black/85 flex items-center justify-center p-4 hidden">
+        <div class="glass-panel w-full max-w-lg p-6 rounded-3xl border border-purple-500/30 neon-glow space-y-4 relative">
+            <div class="flex items-center justify-between">
+                <h3 class="text-lg font-bold text-white"><i class="fa-solid fa-video text-purple-400 mr-2"></i>Upload Global Video</h3>
+                <button onclick="closeUploadModal()" class="text-zinc-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+
+            <form onsubmit="handleGlobalUpload(event)" class="space-y-4">
+                <div class="space-y-1.5">
+                    <label class="text-xs font-semibold text-zinc-300">Video Title</label>
+                    <input type="text" id="vid-title" required placeholder="e.g., How I Gained 10k Subs in 30 Days" class="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-purple-500">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="space-y-1.5">
+                        <label class="text-xs font-semibold text-zinc-300">Format</label>
+                        <select id="vid-type" class="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-purple-500">
+                            <option value="short">Short / Reel (Vertical 9:16)</option>
+                            <option value="long">Long Video (Horizontal 16:9)</option>
+                        </select>
+                    </div>
+                    <div class="space-y-1.5">
+                        <label class="text-xs font-semibold text-zinc-300">Select Video File (.mp4)</label>
+                        <input type="file" id="vid-file" accept="video/mp4,video/webm" required class="w-full bg-zinc-900 border border-zinc-800 rounded-xl p-2.5 text-xs text-zinc-400 file:mr-2 file:py-1 file:px-3 file:rounded-lg file:border-0 file:bg-purple-600 file:text-white">
+                    </div>
+                </div>
+                <div class="space-y-1.5">
+                    <label class="text-xs font-semibold text-zinc-300">Description / Hook Strategy</label>
+                    <textarea id="vid-desc" rows="3" required placeholder="Explain your hook or what viewers will learn..." class="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-purple-500 resize-none"></textarea>
+                </div>
+                <button type="submit" id="upload-submit-btn" class="w-full py-3 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-sm transition-colors flex items-center justify-center space-x-2">
+                    <span>Publish Globally</span>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- SCRIPT -->
+    <script>
+        // YOUR SUPABASE URL AND PUBLISHABLE ANON KEY
+        const SUPABASE_URL = "https://kdanylytvxsktgosvgjw.supabase.co";
+        const SUPABASE_ANON_KEY = "sb_publishable_bhk8btpWpfdFtgxnkV05-w_rbkKl3Ye";
+
+        const LIKED_STORAGE_KEY = "beacreator_liked_ids";
+        const PROFILE_STORAGE_KEY = "beacreator_channel_profile";
+        const LOCAL_PROFILES_MAP_KEY = "beacreator_all_profiles_cache";
+        const LOCAL_FOLLOWS_KEY = "beacreator_follows_cache";
+
+        let supabaseClient = null;
+        try {
+            if (window.supabase && SUPABASE_URL && SUPABASE_ANON_KEY) {
+                supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            }
+        } catch (e) {
+            console.error("Supabase init error:", e);
+        }
+
+        let currentFilter = 'all';
+        let allVideosCache = [];
+        let profilesMap = {}; // username -> { username, bio, about, logo_url }
+        let followsList = []; // array of { follower_username, following_username, follower_logo }
+        let activeChannelUsername = null;
+        let pendingLogoDataUrl = '';
+        let videoObserver = null;
+        const likingInProgress = new Set();
+
+        // ==========================================
+        // INITIALIZATION
+        // ==========================================
+        window.addEventListener('DOMContentLoaded', async () => {
+            loadLocalCaches();
+            updateHeaderProfileUI();
+            setupVideoObserver();
+            await Promise.all([
+                loadAllProfilesAndFollows(),
+                loadGlobalVideos(true)
+            ]);
+        });
+
+        function loadLocalCaches() {
+            try {
+                const savedMap = localStorage.getItem(LOCAL_PROFILES_MAP_KEY);
+                if (savedMap) profilesMap = JSON.parse(savedMap) || {};
+                const myProfile = getMyProfile();
+                if (myProfile && myProfile.username) {
+                    profilesMap[myProfile.username.toLowerCase()] = myProfile;
+                }
+                const savedFollows = localStorage.getItem(LOCAL_FOLLOWS_KEY);
+                if (savedFollows) followsList = JSON.parse(savedFollows) || [];
+            } catch (_) {}
+        }
+
+        function getMyProfile() {
+            try {
+                const raw = localStorage.getItem(PROFILE_STORAGE_KEY);
+                if (raw) return JSON.parse(raw);
+                const legacyName = localStorage.getItem('beacreator_user_name');
+                if (legacyName) {
+                    return { username: cleanUsername(legacyName), bio: '', about: '', logo_url: '' };
+                }
+            } catch (_) {}
+            return null;
+        }
+
+        function cleanUsername(input) {
+            return String(input || '')
+                .trim()
+                .replace(/^@+/, '')
+                .replace(/\s+/g, '_')
+                .replace(/[^a-zA-Z0-9_.-]/g, '')
+                .slice(0, 32);
+        }
+
+        // ==========================================
+        // CHANNEL PROFILE & LOGO CREATION
+        // ==========================================
+        function updateHeaderProfileUI() {
+            const myProfile = getMyProfile();
+            const textEl = document.getElementById('header-username-text');
+            const imgEl = document.getElementById('header-avatar-img');
+            const iconEl = document.getElementById('header-avatar-icon');
+
+            if (myProfile && myProfile.username) {
+                textEl.textContent = `@${myProfile.username}`;
+                if (myProfile.logo_url) {
+                    imgEl.src = myProfile.logo_url;
+                    imgEl.classList.remove('hidden');
+                    iconEl.classList.add('hidden');
+                } else {
+                    imgEl.classList.add('hidden');
+                    iconEl.classList.remove('hidden');
+                }
+            } else {
+                textEl.textContent = 'Create Channel';
+                imgEl.classList.add('hidden');
+                iconEl.classList.remove('hidden');
+            }
+        }
+
+        function openProfileModal() {
+            const modal = document.getElementById('profile-modal');
+            const myProfile = getMyProfile();
+            const usernameInput = document.getElementById('profile-username');
+            const bioInput = document.getElementById('profile-bio');
+            const aboutInput = document.getElementById('profile-about');
+            const previewImg = document.getElementById('profile-logo-preview');
+            const placeholder = document.getElementById('profile-logo-placeholder');
+
+            if (myProfile) {
+                usernameInput.value = myProfile.username || '';
+                bioInput.value = myProfile.bio || '';
+                aboutInput.value = myProfile.about || '';
+                pendingLogoDataUrl = myProfile.logo_url || '';
+            } else {
+                pendingLogoDataUrl = '';
+            }
+
+            if (pendingLogoDataUrl) {
+                previewImg.src = pendingLogoDataUrl;
+                previewImg.classList.remove('hidden');
+                placeholder.classList.add('hidden');
+            } else {
+                previewImg.classList.add('hidden');
+                placeholder.classList.remove('hidden');
+            }
+
+            modal.classList.remove('hidden');
+        }
+
+        function closeProfileModal() {
+            document.getElementById('profile-modal').classList.add('hidden');
+        }
+
+        // Compress channel logo into a fast 160x160 circular-ready WebP/JPEG data URL
+        function previewChannelLogo(event) {
+            const file = event.target.files && event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    const size = 160;
+                    canvas.width = size;
+                    canvas.height = size;
+                    const ctx = canvas.getContext('2d');
+
+                    // Center-crop square
+                    const minSide = Math.min(img.width, img.height);
+                    const sx = (img.width - minSide) / 2;
+                    const sy = (img.height - minSide) / 2;
+                    ctx.drawImage(img, sx, sy, minSide, minSide, 0, 0, size, size);
+
+                    pendingLogoDataUrl = canvas.toDataURL('image/jpeg', 0.82);
+                    const previewImg = document.getElementById('profile-logo-preview');
+                    const placeholder = document.getElementById('profile-logo-placeholder');
+                    previewImg.src = pendingLogoDataUrl;
+                    previewImg.classList.remove('hidden');
+                    placeholder.classList.add('hidden');
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        async function handleSaveProfile(event) {
+            event.preventDefault();
+            const rawUsername = document.getElementById('profile-username').value;
+            const username = cleanUsername(rawUsername);
+            const bio = document.getElementById('profile-bio').value.trim();
+            const about = document.getElementById('profile-about').value.trim();
+            const btn = document.getElementById('save-profile-btn');
+
+            if (!username) {
+                alert('Please enter a valid username (letters, numbers, underscores).');
+                return;
+            }
+
+            btn.disabled = true;
+            btn.textContent = 'Saving Channel...';
+
+            const profileData = {
+                username,
+                bio,
+                about,
+                logo_url: pendingLogoDataUrl || ''
+            };
+
+            // Save locally immediately
+            localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(profileData));
+            localStorage.setItem('beacreator_user_name', username);
+            profilesMap[username.toLowerCase()] = profileData;
+            localStorage.setItem(LOCAL_PROFILES_MAP_KEY, JSON.stringify(profilesMap));
+
+            // Save globally to Supabase profiles table if available
+            if (supabaseClient) {
+                try {
+                    await supabaseClient
+                        .from('profiles')
+                        .upsert([profileData], { onConflict: 'username' });
+                } catch (err) {
+                    console.warn('Supabase profiles sync notice:', err.message);
+                }
+            }
+
+            btn.disabled = false;
+            btn.textContent = 'Save Channel Profile';
+            updateHeaderProfileUI();
+            closeProfileModal();
+            renderFeedsFromCache();
+
+            if (activeChannelUsername && activeChannelUsername.toLowerCase() === username.toLowerCase()) {
+                openCreatorChannel(username);
+            }
+        }
+
+        function viewMySavedChannel() {
+            const myProfile = getMyProfile();
+            if (!myProfile || !myProfile.username) {
+                alert('Save your username first to view your channel.');
+                return;
+            }
+            closeProfileModal();
+            openCreatorChannel(myProfile.username);
+        }
+
+        function openMyChannelOrSetup() {
+            const myProfile = getMyProfile();
+            if (myProfile && myProfile.username) {
+                openCreatorChannel(myProfile.username);
+            } else {
+                openProfileModal();
+            }
+        }
+
+        // ==========================================
+        // LOAD PROFILES & FOLLOWERS FROM SUPABASE
+        // ==========================================
+        async function loadAllProfilesAndFollows() {
+            if (!supabaseClient) return;
+            try {
+                const { data: profiles } = await supabaseClient.from('profiles').select('*');
+                if (Array.isArray(profiles)) {
+                    profiles.forEach(p => {
+                        if (p.username) profilesMap[p.username.toLowerCase()] = p;
+                    });
+                    localStorage.setItem(LOCAL_PROFILES_MAP_KEY, JSON.stringify(profilesMap));
+                }
+            } catch (_) {}
+
+            try {
+                const { data: follows } = await supabaseClient.from('follows').select('*').order('created_at', { ascending: false });
+                if (Array.isArray(follows)) {
+                    followsList = follows;
+                    localStorage.setItem(LOCAL_FOLLOWS_KEY, JSON.stringify(followsList));
+                }
+            } catch (_) {}
+        }
+
+        function getCreatorProfile(username) {
+            const key = String(username || 'Creator').toLowerCase();
+            return profilesMap[key] || {
+                username: username || 'Creator',
+                bio: 'Creator on BeaCreator Community Hub',
+                about: 'This creator has not added a detailed About section yet.',
+                logo_url: ''
+            };
+        }
+
+        function renderAvatarHtml(username, sizeClass = 'w-6 h-6', textClass = 'text-xs') {
+            const prof = getCreatorProfile(username);
+            const safeName = escapeHtml(prof.username || username || 'C');
+            if (prof.logo_url && prof.logo_url.startsWith('data:image/') || safeVideoUrl(prof.logo_url)) {
+                const src = prof.logo_url.startsWith('data:image/') ? prof.logo_url : safeVideoUrl(prof.logo_url);
+                return `<img src="${src}" alt="${safeName}" class="${sizeClass} rounded-full object-cover border border-purple-500/50 shrink-0">`;
+            }
+            const initial = safeName.charAt(0).toUpperCase();
+            return `<div class="${sizeClass} rounded-full bg-gradient-to-tr from-purple-600 to-pink-500 text-white font-extrabold ${textClass} flex items-center justify-center shrink-0">${initial}</div>`;
+        }
+
+        // ==========================================
+        // YOUTUBE-STYLE CREATOR CHANNEL VIEW & FOLLOW
+        // ==========================================
+        async function openCreatorChannel(username) {
+            const cleanTarget = String(username || 'Creator').trim();
+            activeChannelUsername = cleanTarget;
+
+            // Pause any playing feed videos
+            document.querySelectorAll('video.lazy-video').forEach(v => {
+                if (!v.paused) v.pause();
+            });
+
+            document.getElementById('feed-view').classList.add('hidden');
+            document.getElementById('channel-view').classList.remove('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+
+            // Refresh latest profile & followers from Supabase silently
+            await loadAllProfilesAndFollows();
+
+            const prof = getCreatorProfile(cleanTarget);
+            const myProfile = getMyProfile();
+            const isOwnChannel = myProfile && myProfile.username && myProfile.username.toLowerCase() === cleanTarget.toLowerCase();
+
+            // Header & Avatar
+            document.getElementById('channel-logo-wrapper').innerHTML = renderAvatarHtml(cleanTarget, 'w-full h-full', 'text-3xl');
+            document.getElementById('channel-display-title').textContent = `@${prof.username || cleanTarget}`;
+            document.getElementById('channel-short-bio').textContent = prof.bio || 'Creator on BeaCreator Community Hub';
+            document.getElementById('channel-about-bio').textContent = prof.bio || 'No short bio provided.';
+            document.getElementById('channel-about-full').textContent = prof.about || 'No detailed About section added yet.';
+
+            // Show/hide Edit My Channel button
+            document.getElementById('channel-edit-own-btn').classList.toggle('hidden', !isOwnChannel);
+
+            // Filter this creator's videos
+            const creatorVideos = allVideosCache.filter(
+                v => String(v.author || 'Creator').toLowerCase() === cleanTarget.toLowerCase()
+            );
+            const creatorShorts = creatorVideos.filter(v => v.format === 'short');
+            const creatorLongs = creatorVideos.filter(v => v.format === 'long');
+            const totalLikes = creatorVideos.reduce((sum, v) => sum + (Number(v.likes) || 0), 0);
+
+            document.getElementById('channel-videos-count').textContent = String(creatorVideos.length);
+            document.getElementById('channel-likes-count').textContent = String(totalLikes);
+
+            // Render Creator Uploads
+            const chShortsEl = document.getElementById('channel-shorts-feed');
+            const chLongsEl = document.getElementById('channel-long-feed');
+            chShortsEl.innerHTML = creatorShorts.length
+                ? creatorShorts.map(renderShort).join('')
+                : '<div class="empty-state">No Shorts uploaded by this channel yet.</div>';
+            chLongsEl.innerHTML = creatorLongs.length
+                ? creatorLongs.map(renderLong).join('')
+                : '<div class="empty-state">No long videos uploaded by this channel yet.</div>';
+
+            observeFeedVideos();
+            renderChannelFollowersUI();
+            switchChannelTab('videos');
+        }
+
+        function renderChannelFollowersUI() {
+            if (!activeChannelUsername) return;
+            const targetKey = activeChannelUsername.toLowerCase();
+            const followers = followsList.filter(
+                f => String(f.following_username || '').toLowerCase() === targetKey
+            );
+
+            document.getElementById('channel-followers-count').textContent = String(followers.length);
+            document.getElementById('ch-tab-followers-badge').textContent = String(followers.length);
+
+            const myProfile = getMyProfile();
+            const myUsername = myProfile && myProfile.username ? myProfile.username : '';
+            const isFollowing = myUsername && followers.some(
+                f => String(f.follower_username || '').toLowerCase() === myUsername.toLowerCase()
+            );
+
+            const followBtn = document.getElementById('channel-follow-btn');
+            if (myUsername && myUsername.toLowerCase() === targetKey) {
+                followBtn.className = 'px-5 py-2.5 rounded-full font-bold text-xs bg-zinc-800 text-zinc-300 border border-zinc-700';
+                followBtn.innerHTML = '<i class="fa-solid fa-sliders mr-1.5"></i><span>Customize Channel</span>';
+                followBtn.onclick = openProfileModal;
+            } else if (isFollowing) {
+                followBtn.className = 'px-6 py-3 rounded-full font-extrabold text-xs sm:text-sm transition-colors flex items-center gap-2 bg-purple-600/25 text-purple-200 border border-purple-500/50 hover:bg-red-950/50 hover:text-red-200 hover:border-red-500/40';
+                followBtn.innerHTML = '<i class="fa-solid fa-user-check"></i><span>Following ✓</span>';
+                followBtn.onclick = toggleFollowCurrentChannel;
+            } else {
+                followBtn.className = 'px-6 py-3 rounded-full font-extrabold text-xs sm:text-sm transition-colors flex items-center gap-2 bg-white text-black hover:bg-zinc-200';
+                followBtn.innerHTML = '<i class="fa-solid fa-user-plus"></i><span>Follow Channel</span>';
+                followBtn.onclick = toggleFollowCurrentChannel;
+            }
+
+            // Populate "Who Followed" Grid
+            const listContainer = document.getElementById('channel-followers-list');
+            if (!followers.length) {
+                listContainer.innerHTML = '<div class="col-span-full empty-state">No followers yet. Be the first to follow this creator!</div>';
+                return;
+            }
+
+            listContainer.innerHTML = followers.map(f => {
+                const fName = escapeHtml(f.follower_username || 'Creator');
+                const jsSafeName = escapeJsString(f.follower_username || 'Creator');
+                const fProf = getCreatorProfile(f.follower_username);
+                const subBio = escapeHtml(fProf.bio || 'Creator Channel');
+                return `
+                    <div onclick="openCreatorChannel('${jsSafeName}')" class="p-3.5 rounded-2xl bg-zinc-900/90 hover:bg-zinc-800 border border-zinc-800 hover:border-purple-500/50 cursor-pointer flex items-center justify-between gap-3 transition-colors">
+                        <div class="flex items-center gap-3 min-w-0">
+                            ${renderAvatarHtml(f.follower_username, 'w-11 h-11', 'text-sm')}
+                            <div class="min-w-0">
+                                <div class="text-sm font-extrabold text-white truncate">@${fName}</div>
+                                <div class="text-[11px] text-zinc-400 truncate">${subBio}</div>
+                            </div>
+                        </div>
+                        <span class="text-xs text-purple-400 font-bold shrink-0">View <i class="fa-solid fa-arrow-right ml-1"></i></span>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        async function toggleFollowCurrentChannel() {
+            if (!activeChannelUsername) return;
+            const myProfile = getMyProfile();
+            if (!myProfile || !myProfile.username) {
+                alert('Please create your channel username first so creators can see who followed them!');
+                openProfileModal();
+                return;
+            }
+
+            const follower = myProfile.username;
+            const following = activeChannelUsername;
+            if (follower.toLowerCase() === following.toLowerCase()) {
+                openProfileModal();
+                return;
+            }
+
+            const existingIndex = followsList.findIndex(
+                f => String(f.follower_username || '').toLowerCase() === follower.toLowerCase() &&
+                     String(f.following_username || '').toLowerCase() === following.toLowerCase()
+            );
+
+            if (existingIndex >= 0) {
+                // Unfollow
+                followsList.splice(existingIndex, 1);
+                localStorage.setItem(LOCAL_FOLLOWS_KEY, JSON.stringify(followsList));
+                renderChannelFollowersUI();
+
+                if (supabaseClient) {
+                    try {
+                        await supabaseClient
+                            .from('follows')
+                            .delete()
+                            .eq('follower_username', follower)
+                            .eq('following_username', following);
+                    } catch (_) {}
+                }
+            } else {
+                // Follow (1 follow per user pair)
+                const newEntry = {
+                    follower_username: follower,
+                    following_username: following,
+                    follower_logo: myProfile.logo_url || '',
+                    created_at: new Date().toISOString()
+                };
+                followsList.unshift(newEntry);
+                localStorage.setItem(LOCAL_FOLLOWS_KEY, JSON.stringify(followsList));
+                renderChannelFollowersUI();
+
+                if (supabaseClient) {
+                    try {
+                        await supabaseClient.from('follows').insert([newEntry]);
+                    } catch (_) {}
+                }
+            }
+        }
+
+        function switchChannelTab(tab) {
+            ['videos', 'followers', 'about'].forEach(t => {
+                const btn = document.getElementById(`ch-tab-${t}`);
+                const panel = document.getElementById(`channel-panel-${t}`);
+                if (btn) {
+                    btn.className = t === tab
+                        ? 'px-4 py-2 rounded-xl text-xs font-bold bg-purple-600 text-white shrink-0'
+                        : 'px-4 py-2 rounded-xl text-xs font-bold bg-zinc-900 text-zinc-400 hover:text-white shrink-0';
+                }
+                if (panel) panel.classList.toggle('hidden', t !== tab);
+            });
+        }
+
+        function showMainFeed() {
+            activeChannelUsername = null;
+            document.getElementById('channel-view').classList.add('hidden');
+            document.getElementById('feed-view').classList.remove('hidden');
+            observeFeedVideos();
+        }
+
+        // ==========================================
+        // LOW-END DEVICE LAZY VIDEO OBSERVER
+        // ==========================================
+        function setupVideoObserver() {
+            if (!('IntersectionObserver' in window)) return;
+            videoObserver = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    const video = entry.target;
+                    if (entry.isIntersecting) {
+                        if (!video.src && video.dataset.src) {
+                            video.src = video.dataset.src;
+                            video.load();
+                        }
+                    } else {
+                        if (!video.paused) video.pause();
+                    }
+                });
+            }, { rootMargin: '150px 0px', threshold: 0.1 });
+        }
+
+        function observeFeedVideos() {
+            const videos = document.querySelectorAll('video.lazy-video');
+            videos.forEach(video => {
+                if (!video.dataset.boundPlay) {
+                    video.dataset.boundPlay = '1';
+                    video.addEventListener('play', () => {
+                        document.querySelectorAll('video.lazy-video').forEach(other => {
+                            if (other !== video && !other.paused) other.pause();
+                        });
+                    });
+                }
+                if (videoObserver) {
+                    videoObserver.observe(video);
+                } else if (!video.src && video.dataset.src) {
+                    video.src = video.dataset.src;
+                }
+            });
+        }
+
+        // ==========================================
+        // UPLOAD VIDEO
+        // ==========================================
+        function openUploadModal() {
+            const myProfile = getMyProfile();
+            if (!myProfile || !myProfile.username) {
+                alert('Create your channel username & logo first before uploading a video!');
+                openProfileModal();
+                return;
+            }
+            document.getElementById('upload-modal').classList.remove('hidden');
+        }
+
+        function closeUploadModal() {
+            document.getElementById('upload-modal').classList.add('hidden');
+        }
+
+        async function handleGlobalUpload(event) {
+            event.preventDefault();
+            if (!supabaseClient) {
+                alert('Supabase is not connected. Check the project URL and publishable key.');
+                return;
+            }
+
+            const myProfile = getMyProfile();
+            const author = (myProfile && myProfile.username) ? myProfile.username : 'Creator';
+            const title = document.getElementById('vid-title').value.trim();
+            const type = document.getElementById('vid-type').value;
+            const fileInput = document.getElementById('vid-file').files[0];
+            const desc = document.getElementById('vid-desc').value.trim();
+            const btn = document.getElementById('upload-submit-btn');
+
+            if (!fileInput) return;
+            if (!['video/mp4', 'video/webm'].includes(fileInput.type)) {
+                alert('Please choose an MP4 or WebM video file.');
+                return;
+            }
+            const maxBytes = 50 * 1024 * 1024;
+            if (fileInput.size > maxBytes) {
+                alert('For this basic uploader, choose a video smaller than 50 MB.');
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i> Uploading to Cloud...';
+            try {
+                const fileName = `${Date.now()}_${fileInput.name.replace(/[^a-zA-Z0-9._-]/g, '')}`;
+                const { error: storageError } = await supabaseClient.storage
+                    .from('videos')
+                    .upload(fileName, fileInput, { contentType: fileInput.type, upsert: false });
+                if (storageError) throw new Error('Storage Error: ' + storageError.message);
+
+                const { data: publicUrlData } = supabaseClient.storage.from('videos').getPublicUrl(fileName);
+                const videoUrl = publicUrlData.publicUrl;
+                const { error: dbError } = await supabaseClient.from('videos').insert([
+                    { title, description: desc, video_url: videoUrl, format: type, author, likes: 0 }
+                ]);
+                if (dbError) throw new Error('Database Error: ' + dbError.message);
+
+                closeUploadModal();
+                document.getElementById('vid-title').value = '';
+                document.getElementById('vid-desc').value = '';
+                document.getElementById('vid-file').value = '';
+                await loadGlobalVideos(true);
+            } catch (error) {
+                alert(error.message || 'Upload failed. Please try again.');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<span>Publish Globally</span>';
+            }
+        }
+
+        // ==========================================
+        // FEED RENDERING & CLICKABLE CREATOR LINKS
+        // ==========================================
+        function filterVideos(filter) {
+            currentFilter = filter;
+            ['all', 'short', 'long'].forEach(type => {
+                const button = document.getElementById(`filter-${type}`);
+                if (!button) return;
+                button.className = type === filter
+                    ? 'px-4 py-2 rounded-xl bg-purple-600 text-white text-xs font-bold transition-colors'
+                    : 'px-4 py-2 rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white text-xs font-bold transition-colors';
+            });
+
+            const feedColumns = document.getElementById('feed-columns');
+            feedColumns.classList.toggle('single-col', filter !== 'all');
+            document.getElementById('shorts-column').classList.toggle('hidden', filter === 'long');
+            document.getElementById('long-column').classList.toggle('hidden', filter === 'short');
+
+            document.querySelectorAll('video.lazy-video').forEach(v => {
+                if (!v.paused) v.pause();
+            });
+        }
+
+        async function loadGlobalVideos(forceRefresh = false) {
+            const shortsFeed = document.getElementById('shorts-feed');
+            const longFeed = document.getElementById('long-feed');
+
+            if (!supabaseClient) {
+                const message = '<div class="empty-state text-amber-300">Supabase is not connected.</div>';
+                shortsFeed.innerHTML = message;
+                longFeed.innerHTML = message;
+                return;
+            }
+
+            if (forceRefresh || !allVideosCache.length) {
+                shortsFeed.innerHTML = '<div class="empty-state"><i class="fa-solid fa-spinner fa-spin mr-2"></i>Loading Shorts...</div>';
+                longFeed.innerHTML = '<div class="empty-state"><i class="fa-solid fa-spinner fa-spin mr-2"></i>Loading long videos...</div>';
+
+                try {
+                    const { data: videos, error } = await supabaseClient
+                        .from('videos')
+                        .select('*')
+                        .order('created_at', { ascending: false });
+                    if (error) throw error;
+                    allVideosCache = videos || [];
+                } catch (error) {
+                    const message = `<div class="empty-state text-red-300">Could not load videos: ${escapeHtml(error.message || 'Unknown error')}</div>`;
+                    shortsFeed.innerHTML = message;
+                    longFeed.innerHTML = message;
+                    return;
+                }
+            }
+
+            renderFeedsFromCache();
+        }
+
+        function renderFeedsFromCache() {
+            const shortsFeed = document.getElementById('shorts-feed');
+            const longFeed = document.getElementById('long-feed');
+            if (!shortsFeed || !longFeed) return;
+
+            if (videoObserver) videoObserver.disconnect();
+
+            const shorts = allVideosCache.filter(video => video.format === 'short');
+            const longs = allVideosCache.filter(video => video.format === 'long');
+
+            shortsFeed.innerHTML = shorts.length
+                ? shorts.map(renderShort).join('')
+                : '<div class="empty-state">No Shorts yet. Be the first to upload one!</div>';
+
+            longFeed.innerHTML = longs.length
+                ? longs.map(renderLong).join('')
+                : '<div class="empty-state">No long videos yet. Be the first to upload one!</div>';
+
+            observeFeedVideos();
+        }
+
+        function renderShort(video) {
+            const id = Number(video.id);
+            const title = escapeHtml(video.title || 'Untitled video');
+            const rawAuthor = video.author || 'Creator';
+            const author = escapeHtml(rawAuthor);
+            const jsAuthor = escapeJsString(rawAuthor);
+            const description = escapeHtml(video.description || 'No description added.');
+            const url = safeVideoUrl(video.video_url);
+            const likes = Math.max(0, Number(video.likes) || 0);
+            const isLiked = hasUserLiked(id);
+            const date = video.created_at
+                ? new Date(video.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
+                : '';
+
+            if (!url || !Number.isFinite(id)) return '';
+
+            return `
+                <article class="short-card">
+                    <video class="lazy-video" data-src="${url}" controls playsinline preload="none" aria-label="${title}"></video>
+                    <div class="short-gradient"></div>
+                    <div class="short-meta">
+                        <div class="flex items-center gap-2 text-xs text-zinc-200 mb-2 flex-wrap">
+                            <button type="button" onclick="openCreatorChannel('${jsAuthor}')" class="creator-chip" title="Visit @${author}'s channel">
+                                ${renderAvatarHtml(rawAuthor, 'w-6 h-6', 'text-[10px]')}
+                                <span class="font-extrabold text-white hover:text-purple-300">@${author}</span>
+                            </button>
+                            <span class="text-zinc-400">· ${escapeHtml(date)}</span>
+                        </div>
+                        <button type="button" class="video-title-button text-base" aria-expanded="false" onclick="toggleDescription(${id}, this)">
+                            ${title} <i class="fa-solid fa-chevron-down text-xs ml-1"></i>
+                        </button>
+                        <p id="description-${id}" class="video-description text-xs text-zinc-200 mt-2 hidden">${description}</p>
+                    </div>
+                    <div class="short-actions">
+                        <button type="button" onclick="openCreatorChannel('${jsAuthor}')" class="short-action" title="View @${author}'s Channel">
+                            ${renderAvatarHtml(rawAuthor, 'w-8 h-8', 'text-xs')}
+                        </button>
+                        <button type="button" class="short-action ${isLiked ? 'is-liked' : ''}" ${isLiked ? 'disabled' : ''} onclick="likeVideo(${id}, this)" aria-label="Like this Short">
+                            <i class="fa-solid fa-heart text-xl ${isLiked ? 'text-pink-500' : 'text-zinc-300'}"></i>
+                            <span class="like-count-${id}">${likes}</span>
+                        </button>
+                        <button type="button" class="short-action" onclick="toggleDescription(${id})" aria-label="Show description">
+                            <i class="fa-solid fa-align-left text-lg"></i>
+                            <span>Details</span>
+                        </button>
+                    </div>
+                </article>`;
+        }
+
+        function renderLong(video) {
+            const id = Number(video.id);
+            const title = escapeHtml(video.title || 'Untitled video');
+            const rawAuthor = video.author || 'Creator';
+            const author = escapeHtml(rawAuthor);
+            const jsAuthor = escapeJsString(rawAuthor);
+            const description = escapeHtml(video.description || 'No description added.');
+            const url = safeVideoUrl(video.video_url);
+            const likes = Math.max(0, Number(video.likes) || 0);
+            const isLiked = hasUserLiked(id);
+            const date = video.created_at
+                ? new Date(video.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })
+                : '';
+
+            if (!url || !Number.isFinite(id)) return '';
+
+            const likeBtnClasses = isLiked
+                ? 'flex items-center gap-2 rounded-xl border border-pink-500/60 bg-pink-500/15 px-3.5 py-2 text-sm text-pink-300 cursor-default'
+                : 'flex items-center gap-2 rounded-xl border border-zinc-700 px-3.5 py-2 text-sm hover:border-purple-500 hover:text-purple-300 transition-colors';
+
+            return `
+                <article class="long-card">
+                    <video class="lazy-video" data-src="${url}" controls playsinline preload="none" aria-label="${title}"></video>
+                    <div class="p-4 sm:p-5">
+                        <div class="flex items-center justify-between gap-3 text-xs text-zinc-500 mb-2">
+                            <span class="px-2 py-1 rounded-full bg-purple-500/10 text-purple-300 font-bold">LONG VIDEO</span>
+                            <span>${escapeHtml(date)}</span>
+                        </div>
+                        <button type="button" class="video-title-button text-base sm:text-lg" aria-expanded="false" onclick="toggleDescription(${id}, this)">
+                            ${title} <i class="fa-solid fa-chevron-down text-xs ml-1"></i>
+                        </button>
+
+                        <p id="description-${id}" class="video-description text-sm text-zinc-300 mt-3 hidden">${description}</p>
+
+                        <!-- Creator Channel Link & Like Bar -->
+                        <div class="flex items-center justify-between gap-3 border-t border-zinc-800 mt-4 pt-3">
+                            <button type="button" onclick="openCreatorChannel('${jsAuthor}')" class="creator-chip" title="Visit @${author}'s channel">
+                                ${renderAvatarHtml(rawAuthor, 'w-7 h-7', 'text-xs')}
+                                <div class="text-left pr-1">
+                                    <div class="text-xs font-extrabold text-white hover:text-purple-300">@${author}</div>
+                                    <div class="text-[10px] text-purple-400">View Channel</div>
+                                </div>
+                            </button>
+
+                            <button type="button" class="${likeBtnClasses}" ${isLiked ? 'disabled' : ''} onclick="likeVideo(${id}, this)">
+                                <i class="fa-solid fa-heart ${isLiked ? 'text-pink-500' : 'text-pink-400'}"></i>
+                                <span class="like-count-${id}">${likes}</span>
+                                <span>${isLiked ? 'Liked' : 'Like'}</span>
+                            </button>
+                        </div>
+                    </div>
+                </article>`;
+        }
+
+        function toggleDescription(id) {
+            const description = document.getElementById(`description-${id}`);
+            if (!description) return;
+            description.classList.toggle('hidden');
+        }
+
+        // ==========================================
+        // ONE-LIKE-PER-USER SYSTEM
+        // ==========================================
+        function getLikedSet() {
+            try {
+                const raw = localStorage.getItem(LIKED_STORAGE_KEY);
+                const parsed = raw ? JSON.parse(raw) : [];
+                return new Set(Array.isArray(parsed) ? parsed.map(Number) : []);
+            } catch (_) {
+                return new Set();
+            }
+        }
+
+        function markVideoAsLiked(id) {
+            try {
+                const liked = getLikedSet();
+                liked.add(Number(id));
+                localStorage.setItem(LIKED_STORAGE_KEY, JSON.stringify([...liked]));
+            } catch (_) {}
+        }
+
+        function hasUserLiked(id) {
+            return getLikedSet().has(Number(id));
+        }
+
+        async function likeVideo(id, buttonEl) {
+            const numericId = Number(id);
+            if (!supabaseClient || !Number.isFinite(numericId)) return;
+            if (hasUserLiked(numericId) || likingInProgress.has(numericId)) return;
+
+            const cachedItem = allVideosCache.find(v => Number(v.id) === numericId);
+            const current = cachedItem ? (Number(cachedItem.likes) || 0) : 0;
+
+            likingInProgress.add(numericId);
+            if (buttonEl) buttonEl.disabled = true;
+
+            // Update all matching counters on screen optimistically
+            document.querySelectorAll(`.like-count-${numericId}`).forEach(el => {
+                el.textContent = String(current + 1);
+            });
+
+            try {
+                const { data, error } = await supabaseClient
+                    .from('videos')
+                    .update({ likes: current + 1 })
+                    .eq('id', numericId)
+                    .select('likes')
+                    .single();
+
+                if (error) throw error;
+
+                const updatedLikes = Number(data?.likes ?? (current + 1));
+                markVideoAsLiked(numericId);
+                if (cachedItem) cachedItem.likes = updatedLikes;
+
+                renderFeedsFromCache();
+                if (activeChannelUsername) openCreatorChannel(activeChannelUsername);
+            } catch (error) {
+                document.querySelectorAll(`.like-count-${numericId}`).forEach(el => {
+                    el.textContent = String(current);
+                });
+                if (buttonEl) buttonEl.disabled = false;
+                alert('Could not save like: ' + (error.message || 'Check Supabase update policies.'));
+            } finally {
+                likingInProgress.delete(numericId);
+            }
+        }
+
+        // ==========================================
+        // HELPERS
+        // ==========================================
+        function safeVideoUrl(value) {
+            try {
+                const parsed = new URL(value, window.location.href);
+                return ['https:', 'http:'].includes(parsed.protocol) ? escapeHtml(parsed.href) : '';
+            } catch (_) { return ''; }
+        }
+
+        function escapeHtml(value) {
+            return String(value ?? '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
+        function escapeJsString(value) {
+            return String(value ?? '')
+                .replace(/\\/g, '\\\\')
+                .replace(/'/g, "\\'")
+                .replace(/"/g, '&quot;');
+        }
+    </script>
+</body>
+</html>
