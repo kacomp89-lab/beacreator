@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en" class="dark">
 <head>
@@ -54,6 +53,30 @@
             backdrop-filter: blur(12px);
             border: 1px solid rgba(39, 39, 42, 0.6);
         }
+
+        html { scroll-behavior: smooth; }
+        .feed-columns { display:grid; grid-template-columns:minmax(300px, .85fr) minmax(0, 1.4fr); gap:1.5rem; align-items:start; }
+        .feed-column { min-width:0; }
+        .column-heading { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:14px; }
+        .shorts-scroll { display:flex; flex-direction:column; gap:18px; max-height:78vh; overflow-y:auto; padding:2px 8px 14px 2px; scroll-snap-type:y mandatory; scrollbar-width:thin; scrollbar-color:#6d28d9 #18181b; }
+        .short-card { position:relative; isolation:isolate; scroll-snap-align:start; height:min(70vh,680px); min-height:430px; border:1px solid rgba(168,85,247,.25); border-radius:24px; overflow:hidden; background:#000; box-shadow:0 12px 38px rgba(0,0,0,.25); }
+        .short-card video { width:100%; height:100%; object-fit:contain; background:#000; }
+        .short-gradient { position:absolute; inset:35% 0 0; z-index:1; pointer-events:none; background:linear-gradient(transparent,rgba(0,0,0,.88)); }
+        .short-meta { position:absolute; z-index:2; left:16px; right:72px; bottom:18px; }
+        .short-actions { position:absolute; z-index:3; right:12px; bottom:24px; display:flex; flex-direction:column; align-items:center; gap:18px; }
+        .short-action { width:48px; min-height:48px; border-radius:999px; background:rgba(24,24,27,.82); border:1px solid rgba(255,255,255,.16); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; color:#fff; transition:transform .18s,background .18s; }
+        .short-action:hover { transform:scale(1.06); background:rgba(124,58,237,.9); }
+        .short-action span { font-size:10px; font-weight:800; }
+        .video-title-button { text-align:left; width:100%; font-weight:800; color:#fff; line-height:1.35; }
+        .video-title-button:hover { color:#d8b4fe; }
+        .video-description { white-space:pre-wrap; overflow-wrap:anywhere; }
+        .long-list { display:flex; flex-direction:column; gap:18px; }
+        .long-card { overflow:hidden; border:1px solid rgba(63,63,70,.8); border-radius:22px; background:rgba(18,18,22,.8); }
+        .long-card video { display:block; width:100%; aspect-ratio:16/9; background:#000; object-fit:contain; }
+        .empty-state { border:1px solid #27272a; border-radius:22px; padding:40px 18px; text-align:center; color:#a1a1aa; }
+        @media (max-width: 850px) { .feed-columns { grid-template-columns:minmax(0,1fr); } .shorts-scroll { max-height:75vh; } .short-card { height:min(72vh,700px); min-height:420px; max-width:460px; width:100%; margin-inline:auto; } }
+        @media (max-width: 480px) { .short-card { min-height:420px; height:68vh; border-radius:18px; } .short-meta { left:12px; right:64px; bottom:14px; } .short-actions { right:8px; bottom:18px; } }
+
     </style>
 </head>
 <body class="bg-[#09090b] text-zinc-100 min-h-screen flex flex-col selection:bg-purple-500 selection:text-white">
@@ -102,15 +125,30 @@
             </div>
         </div>
 
-        <!-- Filter Tabs -->
-        <div class="flex items-center space-x-2 border-b border-zinc-800 pb-3">
-            <button onclick="filterVideos('all')" id="filter-all" class="px-4 py-2 rounded-xl bg-purple-600 text-white text-xs font-bold transition-all">All Videos</button>
-            <button onclick="filterVideos('short')" id="filter-short" class="px-4 py-2 rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white text-xs font-bold transition-all">Shorts / Reels</button>
-            <button onclick="filterVideos('long')" id="filter-long" class="px-4 py-2 rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white text-xs font-bold transition-all">Long Videos</button>
+        <!-- Feed filters -->
+        <div class="flex flex-wrap items-center gap-2 border-b border-zinc-800 pb-3">
+            <button onclick="filterVideos('all')" id="filter-all" class="px-4 py-2 rounded-xl bg-purple-600 text-white text-xs font-bold transition-all"><i class="fa-solid fa-layer-group mr-2"></i>All Videos</button>
+            <button onclick="filterVideos('short')" id="filter-short" class="px-4 py-2 rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white text-xs font-bold transition-all"><i class="fa-solid fa-mobile-screen mr-2"></i>Shorts / Reels</button>
+            <button onclick="filterVideos('long')" id="filter-long" class="px-4 py-2 rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white text-xs font-bold transition-all"><i class="fa-solid fa-tv mr-2"></i>Long Videos</button>
         </div>
 
-        <!-- Video Feed Grid -->
-        <div id="video-feed" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+        <!-- Separate Shorts and Long Video columns -->
+        <div id="feed-columns" class="feed-columns">
+            <section id="shorts-column" class="feed-column">
+                <div class="column-heading">
+                    <h2 class="text-lg font-extrabold text-white"><i class="fa-solid fa-mobile-screen-button text-purple-400 mr-2"></i>Shorts</h2>
+                    <span class="text-xs text-zinc-500">Scroll vertically</span>
+                </div>
+                <div id="shorts-feed" class="shorts-scroll"><div class="empty-state">Loading Shorts...</div></div>
+            </section>
+            <section id="long-column" class="feed-column">
+                <div class="column-heading">
+                    <h2 class="text-lg font-extrabold text-white"><i class="fa-solid fa-clapperboard text-purple-400 mr-2"></i>Long Videos</h2>
+                    <span class="text-xs text-zinc-500">Landscape videos</span>
+                </div>
+                <div id="long-feed" class="long-list"><div class="empty-state">Loading long videos...</div></div>
+            </section>
+        </div>
     </main>
 
     <!-- UPLOAD MODAL -->
@@ -167,9 +205,7 @@
 
         let currentFilter = 'all';
 
-        window.addEventListener('DOMContentLoaded', () => {
-            loadGlobalVideos('all');
-        });
+        window.addEventListener('DOMContentLoaded', () => loadGlobalVideos('all'));
 
         function openUploadModal() {
             const modal = document.getElementById('upload-modal');
@@ -184,7 +220,7 @@
         async function handleGlobalUpload(event) {
             event.preventDefault();
             if (!supabaseClient) {
-                alert("Please add your Supabase URL and Anon Key in the script before uploading!");
+                alert('Supabase is not connected. Check the project URL and publishable key.');
                 return;
             }
 
@@ -192,127 +228,182 @@
             const type = document.getElementById('vid-type').value;
             const fileInput = document.getElementById('vid-file').files[0];
             const desc = document.getElementById('vid-desc').value.trim();
-            const author = localStorage.getItem('beacreator_user_name') || 'Creator';
+            const author = (localStorage.getItem('beacreator_user_name') || 'Creator').slice(0, 80);
             const btn = document.getElementById('upload-submit-btn');
 
             if (!fileInput) return;
+            if (!['video/mp4', 'video/webm'].includes(fileInput.type)) {
+                alert('Please choose an MP4 or WebM video file.');
+                return;
+            }
+            const maxBytes = 50 * 1024 * 1024;
+            if (fileInput.size > maxBytes) {
+                alert('For this basic uploader, choose a video smaller than 50 MB.');
+                return;
+            }
 
             btn.disabled = true;
-            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-2"></i> Uploading to Cloud...`;
-
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i> Uploading to Cloud...';
             try {
-                const fileName = `${Date.now()}_${fileInput.name.replace(/[^a-zA-Z0-9._-]/g, "")}`;
-                const { data: storageData, error: storageError } = await supabaseClient.storage
-                    .from('videos')
-                    .upload(fileName, fileInput);
+                const fileName = `${Date.now()}_${fileInput.name.replace(/[^a-zA-Z0-9._-]/g, '')}`;
+                const { error: storageError } = await supabaseClient.storage.from('videos').upload(fileName, fileInput, { contentType: fileInput.type, upsert: false });
+                if (storageError) throw new Error('Storage Error: ' + storageError.message);
 
-                if (storageError) throw new Error("Storage Error: " + storageError.message);
-
-                const { data: publicUrlData } = supabaseClient.storage
-                    .from('videos')
-                    .getPublicUrl(fileName);
-
+                const { data: publicUrlData } = supabaseClient.storage.from('videos').getPublicUrl(fileName);
                 const videoUrl = publicUrlData.publicUrl;
-
                 const { error: dbError } = await supabaseClient.from('videos').insert([
                     { title, description: desc, video_url: videoUrl, format: type, author, likes: 0 }
                 ]);
+                if (dbError) throw new Error('Database Error: ' + dbError.message);
 
-                if (dbError) throw new Error("Database Error: " + dbError.message);
-
-                btn.disabled = false;
-                btn.innerHTML = `<span>Publish Globally</span>`;
                 closeUploadModal();
                 document.getElementById('vid-title').value = '';
                 document.getElementById('vid-desc').value = '';
                 document.getElementById('vid-file').value = '';
-                loadGlobalVideos(currentFilter);
+                await loadGlobalVideos(currentFilter);
             } catch (error) {
-                alert(error.message);
+                alert(error.message || 'Upload failed. Please try again.');
+            } finally {
                 btn.disabled = false;
-                btn.innerHTML = `<span>Publish Globally</span>`;
+                btn.innerHTML = '<span>Publish Globally</span>';
             }
         }
 
         function filterVideos(filter) {
             currentFilter = filter;
-            ['all', 'short', 'long'].forEach(t => {
-                const btn = document.getElementById(`filter-${t}`);
-                if (btn) {
-                    btn.className = t === filter ? "px-4 py-2 rounded-xl bg-purple-600 text-white text-xs font-bold transition-all" : "px-4 py-2 rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white text-xs font-bold transition-all";
-                }
+            ['all', 'short', 'long'].forEach(type => {
+                const button = document.getElementById(`filter-${type}`);
+                if (!button) return;
+                button.className = type === filter
+                    ? 'px-4 py-2 rounded-xl bg-purple-600 text-white text-xs font-bold transition-all'
+                    : 'px-4 py-2 rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white text-xs font-bold transition-all';
             });
+            document.getElementById('shorts-column').classList.toggle('hidden', filter === 'long');
+            document.getElementById('long-column').classList.toggle('hidden', filter === 'short');
             loadGlobalVideos(filter);
         }
 
         async function loadGlobalVideos(filter) {
-            const feed = document.getElementById('video-feed');
-            feed.innerHTML = `<div class="col-span-full py-20 text-center text-zinc-400 text-sm animate-pulse"><i class="fa-solid fa-spinner fa-spin mr-2"></i> Loading global community feed...</div>`;
+            const shortsFeed = document.getElementById('shorts-feed');
+            const longFeed = document.getElementById('long-feed');
+            shortsFeed.innerHTML = '<div class="empty-state"><i class="fa-solid fa-spinner fa-spin mr-2"></i>Loading Shorts...</div>';
+            longFeed.innerHTML = '<div class="empty-state"><i class="fa-solid fa-spinner fa-spin mr-2"></i>Loading long videos...</div>';
 
             if (!supabaseClient) {
-                feed.innerHTML = `<div class="col-span-full py-16 text-center text-amber-400 text-sm glass-panel rounded-3xl border border-amber-500/30 p-6 space-y-2"><strong>Supabase Not Connected</strong><p class="text-xs text-zinc-400">Please paste your Supabase Project URL and Anon Key at the top of the script section to view global community videos.</p></div>`;
+                const message = '<div class="empty-state text-amber-300">Supabase is not connected. Check the project URL and publishable key in the script.</div>';
+                shortsFeed.innerHTML = message;
+                longFeed.innerHTML = message;
                 return;
             }
 
             try {
                 let query = supabaseClient.from('videos').select('*').order('created_at', { ascending: false });
-                if (filter !== 'all') {
-                    query = query.eq('format', filter);
-                }
-
+                if (filter !== 'all') query = query.eq('format', filter);
                 const { data: videos, error } = await query;
                 if (error) throw error;
+                const items = videos || [];
+                const shorts = items.filter(video => video.format === 'short');
+                const longs = items.filter(video => video.format === 'long');
 
-                if (!videos || videos.length === 0) {
-                    feed.innerHTML = `<div class="col-span-full py-20 text-center text-zinc-500 text-sm glass-panel rounded-3xl border border-zinc-800">No videos found in the community network. Be the first to upload!</div>`;
-                    return;
-                }
-
-                feed.innerHTML = videos.map(v => `
-                    <div class="glass-panel rounded-3xl border border-zinc-800 overflow-hidden flex flex-col space-y-3 group">
-                        <div class="relative w-full ${v.format === 'short' ? 'aspect-[9/16] max-h-80' : 'aspect-video'} bg-black flex items-center justify-center">
-                            <video src="${v.video_url}" controls preload="metadata" class="w-full h-full object-contain"></video>
-                        </div>
-                        <div class="p-5 space-y-2 flex-1 flex flex-col justify-between">
-                            <div>
-                                <div class="flex items-center justify-between text-xs text-zinc-500 mb-1">
-                                    <span class="px-2 py-0.5 rounded-full bg-purple-500/10 text-purple-300 font-semibold uppercase text-[10px]">${v.format === 'short' ? 'Short' : 'Long Video'}</span>
-                                    <span><i class="fa-solid fa-user mr-1"></i> ${escapeHtml(v.author)}</span>
-                                </div>
-                                <h3 class="text-base font-bold text-white">${escapeHtml(v.title)}</h3>
-                                <p class="text-xs text-zinc-400 line-clamp-2 mt-1">${escapeHtml(v.description || '')}</p>
-                            </div>
-                            <div class="flex items-center justify-between pt-3 border-t border-zinc-800/80 text-xs text-zinc-400">
-                                <span>${new Date(v.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</span>
-                                <button onclick="likeVideo(${v.id}, ${v.likes || 0})" class="flex items-center space-x-1 hover:text-purple-400 transition-colors">
-                                    <i class="fa-solid fa-heart text-purple-500"></i>
-                                    <span class="font-bold text-white" id="like-count-${v.id}">${v.likes || 0}</span>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                `).join('');
-            } catch (err) {
-                feed.innerHTML = `<div class="col-span-full py-16 text-center text-red-400 text-sm glass-panel rounded-3xl border border-red-500/30">Error loading feed: ${escapeHtml(err.message)}</div>`;
+                shortsFeed.innerHTML = shorts.length ? shorts.map(renderShort).join('') : '<div class="empty-state">No Shorts yet. Be the first to upload one!</div>';
+                longFeed.innerHTML = longs.length ? longs.map(renderLong).join('') : '<div class="empty-state">No long videos yet. Be the first to upload one!</div>';
+            } catch (error) {
+                const message = `<div class="empty-state text-red-300">Could not load videos: ${escapeHtml(error.message || 'Unknown error')}</div>`;
+                shortsFeed.innerHTML = message;
+                longFeed.innerHTML = message;
             }
         }
 
-        async function likeVideo(id, currentLikes) {
-            if (!supabaseClient) return;
-            const newLikes = currentLikes + 1;
-            const likeSpan = document.getElementById(`like-count-${id}`);
-            if (likeSpan) likeSpan.innerText = newLikes;
-
-            await supabaseClient.from('videos').update({ likes: newLikes }).eq('id', id);
+        function renderShort(video) {
+            const id = Number(video.id);
+            const title = escapeHtml(video.title || 'Untitled video');
+            const author = escapeHtml(video.author || 'Creator');
+            const description = escapeHtml(video.description || 'No description added.');
+            const url = safeVideoUrl(video.video_url);
+            const likes = Math.max(0, Number(video.likes) || 0);
+            const date = video.created_at ? new Date(video.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) : '';
+            if (!url || !Number.isFinite(id)) return '';
+            return `
+                <article class="short-card">
+                    <video src="${url}" controls playsinline preload="metadata" aria-label="${title}"></video>
+                    <div class="short-gradient"></div>
+                    <div class="short-meta">
+                        <div class="flex items-center gap-2 text-xs text-zinc-200 mb-2">
+                            <span class="px-2 py-1 rounded-full bg-purple-600/80 font-bold">SHORT</span>
+                            <span>@${author}</span><span>· ${escapeHtml(date)}</span>
+                        </div>
+                        <button type="button" class="video-title-button text-base" aria-expanded="false" onclick="toggleDescription(${id}, this)">${title} <i class="fa-solid fa-chevron-down text-xs ml-1"></i></button>
+                        <p id="description-${id}" class="video-description text-xs text-zinc-200 mt-2 hidden">${description}</p>
+                    </div>
+                    <div class="short-actions">
+                        <button type="button" class="short-action" onclick="likeVideo(${id}, this)" aria-label="Like this Short"><i class="fa-solid fa-heart text-xl text-pink-400"></i><span id="like-count-${id}">${likes}</span></button>
+                        <button type="button" class="short-action" onclick="toggleDescription(${id}, document.querySelector('[onclick=\"toggleDescription(${id}, this)\"]'))" aria-label="Show description"><i class="fa-solid fa-align-left text-lg"></i><span>Details</span></button>
+                    </div>
+                </article>`;
         }
 
-        function escapeHtml(str) {
-            return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+        function renderLong(video) {
+            const id = Number(video.id);
+            const title = escapeHtml(video.title || 'Untitled video');
+            const author = escapeHtml(video.author || 'Creator');
+            const description = escapeHtml(video.description || 'No description added.');
+            const url = safeVideoUrl(video.video_url);
+            const likes = Math.max(0, Number(video.likes) || 0);
+            const date = video.created_at ? new Date(video.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : '';
+            if (!url || !Number.isFinite(id)) return '';
+            return `
+                <article class="long-card">
+                    <video src="${url}" controls playsinline preload="metadata" aria-label="${title}"></video>
+                    <div class="p-4 sm:p-5">
+                        <div class="flex items-center justify-between gap-3 text-xs text-zinc-500 mb-2"><span class="px-2 py-1 rounded-full bg-purple-500/10 text-purple-300 font-bold">LONG VIDEO</span><span>${escapeHtml(date)}</span></div>
+                        <button type="button" class="video-title-button text-base sm:text-lg" aria-expanded="false" onclick="toggleDescription(${id}, this)">${title} <i class="fa-solid fa-chevron-down text-xs ml-1"></i></button>
+                        <div class="text-xs text-zinc-400 mt-1">by ${author}</div>
+                        <p id="description-${id}" class="video-description text-sm text-zinc-300 mt-3 hidden">${description}</p>
+                        <div class="flex items-center justify-between gap-3 border-t border-zinc-800 mt-4 pt-3"><span class="text-xs text-zinc-500">Creator community</span><button type="button" class="flex items-center gap-2 rounded-xl border border-zinc-700 px-3 py-2 text-sm hover:border-purple-500 hover:text-purple-300" onclick="likeVideo(${id}, this)"><i class="fa-solid fa-heart text-pink-400"></i><span id="like-count-${id}">${likes}</span><span>Like</span></button></div>
+                    </div>
+                </article>`;
         }
+
+        function toggleDescription(id, button) {
+            const description = document.getElementById(`description-${id}`);
+            if (!description) return;
+            const opening = description.classList.contains('hidden');
+            description.classList.toggle('hidden', !opening);
+            if (button) {
+                button.setAttribute('aria-expanded', String(opening));
+                const icon = button.querySelector('i');
+                if (icon) icon.className = opening ? 'fa-solid fa-chevron-up text-xs ml-1' : 'fa-solid fa-chevron-down text-xs ml-1';
+            }
+        }
+
+        async function likeVideo(id, button) {
+            if (!supabaseClient || !button) return;
+            const countElement = document.getElementById(`like-count-${id}`);
+            const current = Number(countElement ? countElement.textContent : 0) || 0;
+            button.disabled = true;
+            try {
+                // Simple prototype update. Use a server-side atomic like system for production.
+                const { data, error } = await supabaseClient.from('videos').update({ likes: current + 1 }).eq('id', id).select('likes').single();
+                if (error) throw error;
+                if (countElement) countElement.textContent = String(data.likes);
+            } catch (error) {
+                alert('Could not save like: ' + (error.message || 'Please check Supabase update policies.'));
+            } finally {
+                button.disabled = false;
+            }
+        }
+
+        function safeVideoUrl(value) {
+            try {
+                const parsed = new URL(value, window.location.href);
+                return ['https:', 'http:'].includes(parsed.protocol) ? escapeHtml(parsed.href) : '';
+            } catch (_) { return ''; }
+        }
+
+        function escapeHtml(value) {
+            return String(value ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+        }
+
     </script>
 </body>
 </html>
-  
-
-
-
