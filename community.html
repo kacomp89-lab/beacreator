@@ -104,18 +104,14 @@
         }
         .short-meta {
             position: absolute;
-            z-index: 2;
+            z-index: 20;
             left: 16px;
             right: 72px;
             bottom: 26px;
-            pointer-events: none; /* Let clicks pass through empty spaces, child buttons have pointer-events auto */
-        }
-        .short-meta * {
-            pointer-events: auto;
         }
         .short-actions {
             position: absolute;
-            z-index: 3;
+            z-index: 20;
             right: 12px;
             bottom: 26px;
             display: flex;
@@ -136,6 +132,7 @@
             gap: 2px;
             color: #fff;
             transition: background-color .15s;
+            cursor: pointer;
         }
         .short-action:hover:not(:disabled) { background: rgba(124, 58, 237, .9); }
         .short-action.is-liked {
@@ -150,6 +147,7 @@
             font-weight: 800;
             color: #fff;
             line-height: 1.35;
+            cursor: pointer;
         }
         .video-title-button:hover { color: #d8b4fe; }
         .video-description {
@@ -236,7 +234,7 @@
             background: rgba(255, 255, 255, 0.2);
             outline: none;
             cursor: pointer;
-            z-index: 10;
+            z-index: 15;
             transition: height 0.15s ease;
             margin: 0;
         }
@@ -269,7 +267,7 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            z-index: 9;
+            z-index: 15;
             opacity: 0;
             pointer-events: none;
             transition: opacity 0.2s ease-in-out;
@@ -293,7 +291,7 @@
             gap: 8px;
             opacity: 0;
             transition: opacity 0.25s ease-in-out;
-            z-index: 10;
+            z-index: 15;
             pointer-events: none;
         }
         .custom-video-container.is-long:hover .long-video-controls,
@@ -331,7 +329,7 @@
             background: rgba(0, 0, 0, 0.35);
             cursor: pointer;
             transition: opacity 0.2s;
-            z-index: 5;
+            z-index: 10;
         }
         .big-play-btn i {
             width: 60px;
@@ -1370,7 +1368,6 @@
 
             if (bigPlayBtn) bigPlayBtn.addEventListener('click', togglePlay);
             if (playPauseBtn) playPauseBtn.addEventListener('click', togglePlay);
-            video.addEventListener('click', togglePlay);
 
             video.addEventListener('play', () => {
                 container.classList.remove('paused');
@@ -1660,17 +1657,17 @@
                         <!-- YouTube Shorts Style Controls & Timeline at Bottom -->
                         <div class="shorts-controls-overlay" onclick="event.stopPropagation()">
                             <div class="flex items-center gap-2">
-                                <button type="button" class="player-play-pause text-purple-300 hover:text-white w-7 h-7 flex items-center justify-center rounded-lg bg-zinc-900/80"><i class="fa-solid fa-play text-xs"></i></button>
-                                <button type="button" class="player-mute text-zinc-300 hover:text-white w-7 h-7 flex items-center justify-center rounded-lg bg-zinc-900/80"><i class="fa-solid fa-volume-high text-xs"></i></button>
+                                <button type="button" class="player-play-pause text-purple-300 hover:text-white w-7 h-7 flex items-center justify-center rounded-lg bg-zinc-900/85"><i class="fa-solid fa-play text-xs"></i></button>
+                                <button type="button" class="player-mute text-zinc-300 hover:text-white w-7 h-7 flex items-center justify-center rounded-lg bg-zinc-900/85"><i class="fa-solid fa-volume-high text-xs"></i></button>
                                 <span class="player-time text-[10px] font-mono text-zinc-300">0:00</span>
                             </div>
-                            <button type="button" class="player-fullscreen text-zinc-300 hover:text-white w-7 h-7 flex items-center justify-center rounded-lg bg-zinc-900/80" title="Fullscreen"><i class="fa-solid fa-expand text-xs"></i></button>
+                            <button type="button" class="player-fullscreen text-zinc-300 hover:text-white w-7 h-7 flex items-center justify-center rounded-lg bg-zinc-900/85" title="Fullscreen"><i class="fa-solid fa-expand text-xs"></i></button>
                         </div>
                         <input type="range" min="0" max="100" value="0" class="shorts-progress-bar video-progress-bar">
                     </div>
 
                     <div class="short-gradient"></div>
-                    <div class="short-meta">
+                    <div class="short-meta" onclick="event.stopPropagation()">
                         <div class="flex items-center gap-2 text-xs text-zinc-200 mb-2 flex-wrap">
                             <button type="button" onclick="event.stopPropagation(); openCreatorChannel('${jsAuthor}')" class="creator-chip" title="Visit @${author}'s channel">
                                 ${renderAvatarHtml(rawAuthor, 'w-6 h-6', 'text-[10px]')}
