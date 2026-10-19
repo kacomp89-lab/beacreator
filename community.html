@@ -165,6 +165,7 @@
             border: 1px solid rgba(63, 63, 70, .8);
             border-radius: 20px;
             background: #121216;
+            position: relative;
         }
         .long-card video {
             display: block;
@@ -202,7 +203,7 @@
             filter: drop-shadow(0 0 4px rgba(56, 189, 248, 0.4));
         }
 
-        /* YOUTUBE SHORTS & CUSTOM VIDEO PLAYER STYLING */
+        /* CUSTOM VIDEO PLAYER & CONTROLS */
         .custom-video-container {
             position: relative;
             width: 100%;
@@ -221,7 +222,6 @@
             display: block;
         }
         
-        /* YouTube Shorts Style Bottom Progress Line */
         .shorts-progress-bar {
             appearance: none;
             -webkit-appearance: none;
@@ -258,7 +258,6 @@
             height: 12px;
         }
 
-        /* Shorts Control Bar (Appears on hover) */
         .shorts-controls-overlay {
             position: absolute;
             bottom: 12px;
@@ -278,7 +277,6 @@
             pointer-events: auto;
         }
 
-        /* Long Video Control Bar */
         .long-video-controls {
             position: absolute;
             bottom: 0;
@@ -369,10 +367,10 @@
         }
     </style>
 </head>
-<body class="bg-[#09090b] text-zinc-100 min-h-screen flex flex-col selection:bg-purple-500 selection:text-white">
+<body class="bg-[#09090b] text-zinc-100 min-h-screen flex flex-col selection:bg-purple-500 selection:text-white pb-16 md:pb-0">
 
     <!-- HEADER -->
-    <header class="sticky top-0 z-40 glass-panel border-b border-zinc-800/80 px-4 lg:px-8 py-3 flex items-center justify-between gap-2">
+    <header class="sticky top-0 z-40 glass-panel border-b border-zinc-800/80 px-4 lg:px-8 py-3 flex items-center justify-between gap-3">
         <div class="flex items-center space-x-3 cursor-pointer" onclick="showMainFeed()">
             <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-purple-600 via-indigo-600 to-pink-500 flex items-center justify-center neon-glow-sm">
                 <i class="fa-solid fa-wand-magic-sparkles text-white text-lg"></i>
@@ -380,6 +378,14 @@
             <div>
                 <span class="text-xl font-extrabold tracking-tight bg-gradient-to-r from-white via-purple-200 to-purple-400 bg-clip-text text-transparent">BeaCreator</span>
                 <span class="hidden sm:inline-block ml-2 px-2 py-0.5 text-[10px] font-semibold bg-purple-950/80 text-purple-300 rounded-full border border-purple-800/50">Community Hub</span>
+            </div>
+        </div>
+
+        <!-- SEARCH BAR -->
+        <div class="flex-1 max-w-md hidden md:block">
+            <div class="relative">
+                <i class="fa-solid fa-search absolute left-3.5 top-3 text-zinc-400 text-xs"></i>
+                <input type="text" id="global-search-input" oninput="handleSearchInput(event)" placeholder="Search videos or @channels..." class="w-full bg-zinc-900 border border-zinc-800 rounded-2xl pl-10 pr-4 py-2 text-xs text-white focus:outline-none focus:border-purple-500 transition-colors">
             </div>
         </div>
 
@@ -412,6 +418,14 @@
         </div>
     </header>
 
+    <!-- MOBILE SEARCH BAR -->
+    <div class="md:hidden px-4 pt-3">
+        <div class="relative">
+            <i class="fa-solid fa-search absolute left-3.5 top-3 text-zinc-400 text-xs"></i>
+            <input type="text" id="mobile-search-input" oninput="handleSearchInput(event)" placeholder="Search videos or @channels..." class="w-full bg-zinc-900 border border-zinc-800 rounded-2xl pl-10 pr-4 py-2 text-xs text-white focus:outline-none focus:border-purple-500">
+        </div>
+    </div>
+
     <!-- VIEW 1: MAIN COMMUNITY FEED -->
     <main id="feed-view" class="flex-1 max-w-6xl w-full mx-auto p-4 lg:p-6 pb-28 space-y-6">
         <div class="relative overflow-hidden rounded-3xl bg-gradient-to-r from-purple-950/60 via-indigo-950/40 to-zinc-900 border border-purple-500/20 p-6 lg:p-8 neon-glow flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
@@ -431,10 +445,21 @@
             </div>
         </div>
 
-        <div class="flex flex-wrap items-center gap-2 border-b border-zinc-800 pb-3">
-            <button onclick="filterVideos('all')" id="filter-all" class="px-4 py-2 rounded-xl bg-purple-600 text-white text-xs font-bold transition-colors"><i class="fa-solid fa-layer-group mr-2"></i>All Videos</button>
-            <button onclick="filterVideos('short')" id="filter-short" class="px-4 py-2 rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white text-xs font-bold transition-colors"><i class="fa-solid fa-mobile-screen mr-2"></i>Shorts / Reels</button>
-            <button onclick="filterVideos('long')" id="filter-long" class="px-4 py-2 rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white text-xs font-bold transition-colors"><i class="fa-solid fa-tv mr-2"></i>Long Videos</button>
+        <!-- FILTER & SORT BAR -->
+        <div class="flex flex-wrap items-center justify-between gap-2 border-b border-zinc-800 pb-3">
+            <div class="flex flex-wrap items-center gap-2">
+                <button onclick="filterVideos('all')" id="filter-all" class="px-4 py-2 rounded-xl bg-purple-600 text-white text-xs font-bold transition-colors"><i class="fa-solid fa-layer-group mr-1.5"></i>All</button>
+                <button onclick="filterVideos('short')" id="filter-short" class="px-4 py-2 rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white text-xs font-bold transition-colors"><i class="fa-solid fa-mobile-screen mr-1.5"></i>Shorts</button>
+                <button onclick="filterVideos('long')" id="filter-long" class="px-4 py-2 rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white text-xs font-bold transition-colors"><i class="fa-solid fa-tv mr-1.5"></i>Long Videos</button>
+                <button onclick="filterVideos('following')" id="filter-following" class="px-4 py-2 rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white text-xs font-bold transition-colors"><i class="fa-solid fa-user-check mr-1.5"></i>Following</button>
+            </div>
+            <div class="flex items-center gap-2">
+                <select id="sort-select" onchange="handleSortChange(event)" class="bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-2 text-xs text-zinc-300 focus:outline-none focus:border-purple-500">
+                    <option value="latest">✨ Latest Uploads</option>
+                    <option value="trending">🔥 Most Liked (Trending)</option>
+                    <option value="views">👀 Most Viewed</option>
+                </select>
+            </div>
         </div>
 
         <div id="feed-columns" class="feed-columns">
@@ -564,6 +589,26 @@
             </div>
         </div>
     </section>
+
+    <!-- MOBILE BOTTOM NAVIGATION BAR -->
+    <nav class="md:hidden fixed bottom-0 left-0 right-0 z-40 glass-panel border-t border-zinc-800/90 px-4 py-2.5 flex items-center justify-around bg-[#09090b]/95 backdrop-blur-md">
+        <button onclick="showMainFeed()" class="flex flex-col items-center gap-1 text-purple-400 text-[10px] font-bold">
+            <i class="fa-solid fa-users text-base"></i>
+            <span>Feed</span>
+        </button>
+        <button onclick="openMyChannelOrSetup()" class="flex flex-col items-center gap-1 text-zinc-400 hover:text-white text-[10px] font-bold">
+            <i class="fa-solid fa-tv text-base"></i>
+            <span>My Channel</span>
+        </button>
+        <button onclick="openUploadModal()" class="flex flex-col items-center gap-1 text-zinc-400 hover:text-white text-[10px] font-bold">
+            <i class="fa-solid fa-circle-plus text-base text-purple-400"></i>
+            <span>Upload</span>
+        </button>
+        <button onclick="openProfileModal()" class="flex flex-col items-center gap-1 text-zinc-400 hover:text-white text-[10px] font-bold">
+            <i class="fa-solid fa-id-card text-base"></i>
+            <span>Profile</span>
+        </button>
+    </nav>
 
     <!-- MODAL 1: COMMENTS DRAWER -->
     <div id="comments-modal" class="fixed inset-0 z-50 bg-black/80 flex items-end sm:items-center justify-center p-0 sm:p-4 hidden">
@@ -709,6 +754,8 @@
         }
 
         let currentFilter = 'all';
+        let currentSort = 'latest';
+        let searchQuery = '';
         let allVideosCache = [];
         let profilesMap = {};
         let followsList = [];
@@ -1061,10 +1108,10 @@
             document.getElementById('channel-likes-count').textContent = String(totalLikes);
 
             document.getElementById('channel-shorts-feed').innerHTML = creatorShorts.length
-                ? creatorShorts.map(renderShort).join('')
+                ? creatorShorts.map(v => renderVideoCard(v, 'short')).join('')
                 : '<div class="empty-state">No Shorts uploaded by this channel yet.</div>';
             document.getElementById('channel-long-feed').innerHTML = creatorLongs.length
-                ? creatorLongs.map(renderLong).join('')
+                ? creatorLongs.map(v => renderVideoCard(v, 'long')).join('')
                 : '<div class="empty-state">No long videos uploaded by this channel yet.</div>';
 
             observeFeedVideos();
@@ -1333,6 +1380,61 @@
             });
         }
 
+        // SHARE LINK FUNCTIONALITY
+        function shareVideo(videoId, event) {
+            if (event) event.stopPropagation();
+            const shareUrl = window.location.href.split('#')[0] + '#video-' + videoId;
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(shareUrl).then(() => {
+                    alert('Video link copied to clipboard!');
+                }).catch(() => {
+                    prompt('Copy video link:', shareUrl);
+                });
+            } else {
+                prompt('Copy video link:', shareUrl);
+            }
+        }
+
+        // DELETE VIDEO FUNCTIONALITY
+        async function deleteVideo(videoId, videoUrl, event) {
+            if (event) event.stopPropagation();
+            const myUsername = getActiveUsername();
+            const videoObj = allVideosCache.find(v => Number(v.id) === Number(videoId));
+            const author = videoObj ? videoObj.author : '';
+
+            const isOwner = myUsername && author && myUsername.toLowerCase() === author.toLowerCase();
+            
+            if (!isOwner) {
+                const pin = prompt('Enter Admin PIN to delete this video:');
+                if (pin !== ADMIN_SECRET_PIN) {
+                    alert('Unauthorized. Only the video creator or admin can delete this video.');
+                    return;
+                }
+            }
+
+            if (!confirm('Are you sure you want to delete this video? This cannot be undone.')) return;
+
+            try {
+                if (supabaseClient) {
+                    if (videoUrl && videoUrl.includes('/videos/')) {
+                        const pathPart = videoUrl.split('/videos/').pop();
+                        if (pathPart) {
+                            await supabaseClient.storage.from('videos').remove([decodeURIComponent(pathPart)]);
+                        }
+                    }
+                    const { error } = await supabaseClient.from('videos').delete().eq('id', Number(videoId));
+                    if (error) throw error;
+                }
+
+                allVideosCache = allVideosCache.filter(v => Number(v.id) !== Number(videoId));
+                renderFeedsFromCache();
+                if (activeChannelUsername) openCreatorChannel(activeChannelUsername);
+                alert('Video deleted successfully.');
+            } catch (err) {
+                alert('Failed to delete video: ' + (err.message || 'Check database policies.'));
+            }
+        }
+
         // CUSTOM VIDEO PLAYER & VIEWS TRACKER
         function initCustomPlayer(containerId, videoId) {
             const container = document.getElementById(containerId);
@@ -1558,7 +1660,7 @@
 
         function filterVideos(filter) {
             currentFilter = filter;
-            ['all', 'short', 'long'].forEach(type => {
+            ['all', 'short', 'long', 'following'].forEach(type => {
                 const button = document.getElementById(`filter-${type}`);
                 if (!button) return;
                 button.className = type === filter
@@ -1567,13 +1669,30 @@
             });
 
             const feedColumns = document.getElementById('feed-columns');
-            feedColumns.classList.toggle('single-col', filter !== 'all');
+            feedColumns.classList.toggle('single-col', filter === 'following' || filter === 'short' || filter === 'long');
             document.getElementById('shorts-column').classList.toggle('hidden', filter === 'long');
             document.getElementById('long-column').classList.toggle('hidden', filter === 'short');
 
             document.querySelectorAll('video.custom-player-video').forEach(v => {
                 if (!v.paused) v.pause();
             });
+
+            renderFeedsFromCache();
+        }
+
+        function handleSortChange(event) {
+            currentSort = event.target.value;
+            renderFeedsFromCache();
+        }
+
+        function handleSearchInput(event) {
+            searchQuery = event.target.value.trim().toLowerCase();
+            const desktopInput = document.getElementById('global-search-input');
+            const mobileInput = document.getElementById('mobile-search-input');
+            if (desktopInput && desktopInput.value !== searchQuery) desktopInput.value = searchQuery;
+            if (mobileInput && mobileInput.value !== searchQuery) mobileInput.value = searchQuery;
+
+            renderFeedsFromCache();
         }
 
         async function loadGlobalVideos(forceRefresh = false) {
@@ -1616,21 +1735,56 @@
 
             if (videoObserver) videoObserver.disconnect();
 
-            const shorts = allVideosCache.filter(video => video.format === 'short');
-            const longs = allVideosCache.filter(video => video.format === 'long');
+            let filtered = [...allVideosCache];
+
+            if (searchQuery) {
+                filtered = filtered.filter(v => {
+                    const titleMatch = (v.title || '').toLowerCase().includes(searchQuery);
+                    const descMatch = (v.description || '').toLowerCase().includes(searchQuery);
+                    const authorMatch = (v.author || '').toLowerCase().includes(searchQuery);
+                    return titleMatch || descMatch || authorMatch;
+                });
+            }
+
+            if (currentFilter === 'following') {
+                const myUsername = getActiveUsername();
+                if (!myUsername) {
+                    filtered = [];
+                } else {
+                    const followingSet = new Set(
+                        followsList
+                            .filter(f => String(f.follower_username || '').toLowerCase() === myUsername.toLowerCase())
+                            .map(f => String(f.following_username || '').toLowerCase())
+                    );
+                    filtered = filtered.filter(v => followingSet.has(String(v.author || '').toLowerCase()));
+                }
+            }
+
+            filtered.sort((a, b) => {
+                if (currentSort === 'trending') {
+                    return (Number(b.likes) || 0) - (Number(a.likes) || 0);
+                } else if (currentSort === 'views') {
+                    return (Number(b.views) || 0) - (Number(a.views) || 0);
+                } else {
+                    return new Date(b.created_at || 0) - new Date(a.created_at || 0);
+                }
+            });
+
+            const shorts = filtered.filter(video => video.format === 'short');
+            const longs = filtered.filter(video => video.format === 'long');
 
             shortsFeed.innerHTML = shorts.length
-                ? shorts.map(renderShort).join('')
-                : '<div class="empty-state">No Shorts yet. Be the first to upload one!</div>';
+                ? shorts.map(v => renderVideoCard(v, 'short')).join('')
+                : '<div class="empty-state">No Shorts found matching your criteria.</div>';
 
             longFeed.innerHTML = longs.length
-                ? longs.map(renderLong).join('')
-                : '<div class="empty-state">No long videos yet. Be the first to upload one!</div>';
+                ? longs.map(v => renderVideoCard(v, 'long')).join('')
+                : '<div class="empty-state">No long videos found matching your criteria.</div>';
 
             observeFeedVideos();
         }
 
-        function renderShort(video) {
+        function renderVideoCard(video, format) {
             const id = Number(video.id);
             const title = escapeHtml(video.title || 'Untitled video');
             const rawAuthor = video.author || 'Creator';
@@ -1643,145 +1797,147 @@
             const commentCount = getCommentCount(id);
             const isLiked = hasUserLiked(id);
             const date = video.created_at
-                ? new Date(video.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
+                ? new Date(video.created_at).toLocaleDateString(undefined, format === 'short' ? { month: 'short', day: 'numeric' } : { month: 'short', day: 'numeric', year: 'numeric' })
                 : '';
+
+            const myUsername = getActiveUsername();
+            const isOwner = myUsername && rawAuthor && myUsername.toLowerCase() === rawAuthor.toLowerCase();
+            const deleteBtnHtml = isOwner ? `
+                <button type="button" onclick="event.stopPropagation(); deleteVideo(${id}, '${escapeJsString(video.video_url)}', event)" class="short-action bg-red-950/80 border-red-500/40 hover:bg-red-600" title="Delete Video">
+                    <i class="fa-solid fa-trash text-red-300 text-sm"></i>
+                    <span>Delete</span>
+                </button>` : '';
 
             if (!url || !Number.isFinite(id)) return '';
 
-            return `
-                <article class="short-card">
-                    <div id="player-container-${id}" class="custom-video-container paused" oncontextmenu="return false;">
-                        <video class="custom-player-video" data-src="${url}" playsinline preload="none" controlsList="nodownload" disablePictureInPicture aria-label="${title}"></video>
-                        <div class="big-play-btn player-big-play"><i class="fa-solid fa-play"></i></div>
-                        
-                        <!-- YouTube Shorts Style Controls & Timeline at Bottom -->
-                        <div class="shorts-controls-overlay" onclick="event.stopPropagation()">
-                            <div class="flex items-center gap-2">
-                                <button type="button" class="player-play-pause text-purple-300 hover:text-white w-7 h-7 flex items-center justify-center rounded-lg bg-zinc-900/85"><i class="fa-solid fa-play text-xs"></i></button>
-                                <button type="button" class="player-mute text-zinc-300 hover:text-white w-7 h-7 flex items-center justify-center rounded-lg bg-zinc-900/85"><i class="fa-solid fa-volume-high text-xs"></i></button>
-                                <span class="player-time text-[10px] font-mono text-zinc-300">0:00</span>
-                            </div>
-                            <button type="button" class="player-fullscreen text-zinc-300 hover:text-white w-7 h-7 flex items-center justify-center rounded-lg bg-zinc-900/85" title="Fullscreen"><i class="fa-solid fa-expand text-xs"></i></button>
-                        </div>
-                        <input type="range" min="0" max="100" value="0" class="shorts-progress-bar video-progress-bar">
-                    </div>
-
-                    <div class="short-gradient"></div>
-                    <div class="short-meta" onclick="event.stopPropagation()">
-                        <div class="flex items-center gap-2 text-xs text-zinc-200 mb-2 flex-wrap">
-                            <button type="button" onclick="event.stopPropagation(); openCreatorChannel('${jsAuthor}')" class="creator-chip" title="Visit @${author}'s channel">
-                                ${renderAvatarHtml(rawAuthor, 'w-6 h-6', 'text-[10px]')}
-                                <span class="font-extrabold text-white hover:text-purple-300 flex items-center">
-                                    <span>@${author}</span>${renderVerifiedBadge(rawAuthor)}
-                                </span>
-                            </button>
-                            <span class="text-zinc-400">· <i class="fa-solid fa-eye mr-0.5"></i><span class="view-count-${id}">${views}</span> views</span>
-                        </div>
-                        <button type="button" class="video-title-button text-base" aria-expanded="false" onclick="event.stopPropagation(); toggleDescription(${id})">
-                            ${title} <i class="fa-solid fa-chevron-down text-xs ml-1"></i>
-                        </button>
-                        <p id="description-${id}" class="video-description text-xs text-zinc-200 mt-2 hidden">${description}</p>
-                    </div>
-                    <div class="short-actions" onclick="event.stopPropagation()">
-                        <button type="button" onclick="event.stopPropagation(); openCreatorChannel('${jsAuthor}')" class="short-action" title="View @${author}'s Channel">
-                            ${renderAvatarHtml(rawAuthor, 'w-8 h-8', 'text-xs')}
-                        </button>
-                        <button type="button" class="short-action ${isLiked ? 'is-liked' : ''}" ${isLiked ? 'disabled' : ''} onclick="event.stopPropagation(); likeVideo(${id}, this)" aria-label="Like this Short">
-                            <i class="fa-solid fa-heart text-lg ${isLiked ? 'text-pink-500' : 'text-zinc-300'}"></i>
-                            <span class="like-count-${id}">${likes}</span>
-                        </button>
-                        <button type="button" class="short-action" onclick="event.stopPropagation(); openCommentsModal(${id}, event)" aria-label="Comments">
-                            <i class="fa-solid fa-comment-dots text-lg text-purple-300"></i>
-                            <span class="comment-count-${id}">${commentCount}</span>
-                        </button>
-                        <button type="button" class="short-action" onclick="event.stopPropagation(); toggleDescription(${id})" aria-label="Show description">
-                            <i class="fa-solid fa-align-left text-base"></i>
-                            <span>Info</span>
-                        </button>
-                    </div>
-                </article>`;
-        }
-
-        function renderLong(video) {
-            const id = Number(video.id);
-            const title = escapeHtml(video.title || 'Untitled video');
-            const rawAuthor = video.author || 'Creator';
-            const author = escapeHtml(rawAuthor);
-            const jsAuthor = escapeJsString(rawAuthor);
-            const description = escapeHtml(video.description || 'No description added.');
-            const url = safeVideoUrl(video.video_url);
-            const likes = Math.max(0, Number(video.likes) || 0);
-            const views = Math.max(0, Number(video.views) || 0);
-            const commentCount = getCommentCount(id);
-            const isLiked = hasUserLiked(id);
-            const date = video.created_at
-                ? new Date(video.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })
-                : '';
-
-            if (!url || !Number.isFinite(id)) return '';
-
-            const likeBtnClasses = isLiked
-                ? 'flex items-center gap-2 rounded-xl border border-pink-500/60 bg-pink-500/15 px-3.5 py-2 text-xs sm:text-sm text-pink-300 cursor-default'
-                : 'flex items-center gap-2 rounded-xl border border-zinc-700 px-3.5 py-2 text-xs sm:text-sm hover:border-purple-500 hover:text-purple-300 transition-colors';
-
-            return `
-                <article class="long-card">
-                    <div id="player-container-${id}" class="custom-video-container is-long paused" oncontextmenu="return false;">
-                        <video class="custom-player-video" data-src="${url}" playsinline preload="none" controlsList="nodownload" disablePictureInPicture aria-label="${title}"></video>
-                        <div class="big-play-btn player-big-play"><i class="fa-solid fa-play"></i></div>
-                        <div class="long-video-controls" onclick="event.stopPropagation()">
-                            <input type="range" min="0" max="100" value="0" class="long-progress-bar video-progress-bar">
-                            <div class="flex items-center justify-between text-xs text-zinc-300">
-                                <div class="flex items-center gap-3">
-                                    <button type="button" class="player-play-pause text-purple-300 hover:text-white w-7 h-7 flex items-center justify-center rounded-lg bg-zinc-800/80"><i class="fa-solid fa-play text-xs"></i></button>
-                                    <button type="button" class="player-mute text-zinc-300 hover:text-white w-7 h-7 flex items-center justify-center rounded-lg bg-zinc-800/80"><i class="fa-solid fa-volume-high text-xs"></i></button>
-                                    <span class="player-time text-[10px] font-mono text-zinc-400">0:00 / 0:00</span>
+            if (format === 'short') {
+                return `
+                    <article class="short-card" id="video-${id}">
+                        <div id="player-container-${id}" class="custom-video-container paused" oncontextmenu="return false;">
+                            <video class="custom-player-video" data-src="${url}" playsinline preload="none" controlsList="nodownload" disablePictureInPicture aria-label="${title}"></video>
+                            <div class="big-play-btn player-big-play"><i class="fa-solid fa-play"></i></div>
+                            
+                            <div class="shorts-controls-overlay" onclick="event.stopPropagation()">
+                                <div class="flex items-center gap-2">
+                                    <button type="button" class="player-play-pause text-purple-300 hover:text-white w-7 h-7 flex items-center justify-center rounded-lg bg-zinc-900/85"><i class="fa-solid fa-play text-xs"></i></button>
+                                    <button type="button" class="player-mute text-zinc-300 hover:text-white w-7 h-7 flex items-center justify-center rounded-lg bg-zinc-900/85"><i class="fa-solid fa-volume-high text-xs"></i></button>
+                                    <span class="player-time text-[10px] font-mono text-zinc-300">0:00</span>
                                 </div>
-                                <button type="button" class="player-fullscreen text-zinc-300 hover:text-white w-7 h-7 flex items-center justify-center rounded-lg bg-zinc-800/80"><i class="fa-solid fa-expand text-xs"></i></button>
+                                <button type="button" class="player-fullscreen text-zinc-300 hover:text-white w-7 h-7 flex items-center justify-center rounded-lg bg-zinc-900/85" title="Fullscreen"><i class="fa-solid fa-expand text-xs"></i></button>
                             </div>
+                            <input type="range" min="0" max="100" value="0" class="shorts-progress-bar video-progress-bar">
                         </div>
-                    </div>
-                    <div class="p-4 sm:p-5">
-                        <div class="flex items-center justify-between gap-3 text-xs text-zinc-500 mb-2">
-                            <span class="px-2 py-1 rounded-full bg-purple-500/10 text-purple-300 font-bold">LONG VIDEO</span>
-                            <div class="flex items-center gap-3">
-                                <span><i class="fa-solid fa-eye mr-1"></i><strong class="view-count-${id} text-zinc-300">${views}</strong> views</span>
-                                <span>${escapeHtml(date)}</span>
-                            </div>
-                        </div>
-                        <button type="button" class="video-title-button text-base sm:text-lg" aria-expanded="false" onclick="event.stopPropagation(); toggleDescription(${id})">
-                            ${title} <i class="fa-solid fa-chevron-down text-xs ml-1"></i>
-                        </button>
 
-                        <p id="description-${id}" class="video-description text-sm text-zinc-300 mt-3 hidden">${description}</p>
-
-                        <div class="flex items-center justify-between gap-2 flex-wrap border-t border-zinc-800 mt-4 pt-3">
-                            <button type="button" onclick="event.stopPropagation(); openCreatorChannel('${jsAuthor}')" class="creator-chip" title="Visit @${author}'s channel">
-                                ${renderAvatarHtml(rawAuthor, 'w-7 h-7', 'text-xs')}
-                                <div class="text-left pr-1">
-                                    <div class="text-xs font-extrabold text-white hover:text-purple-300 flex items-center">
+                        <div class="short-gradient"></div>
+                        <div class="short-meta" onclick="event.stopPropagation()">
+                            <div class="flex items-center gap-2 text-xs text-zinc-200 mb-2 flex-wrap">
+                                <button type="button" onclick="event.stopPropagation(); openCreatorChannel('${jsAuthor}')" class="creator-chip" title="Visit @${author}'s channel">
+                                    ${renderAvatarHtml(rawAuthor, 'w-6 h-6', 'text-[10px]')}
+                                    <span class="font-extrabold text-white hover:text-purple-300 flex items-center">
                                         <span>@${author}</span>${renderVerifiedBadge(rawAuthor)}
-                                    </div>
-                                    <div class="text-[10px] text-purple-400">View Channel</div>
-                                </div>
+                                    </span>
+                                </button>
+                                <span class="text-zinc-400">· <i class="fa-solid fa-eye mr-0.5"></i><span class="view-count-${id}">${views}</span> views</span>
+                            </div>
+                            <button type="button" class="video-title-button text-base" aria-expanded="false" onclick="event.stopPropagation(); toggleDescription(${id})">
+                                ${title} <i class="fa-solid fa-chevron-down text-xs ml-1"></i>
                             </button>
+                            <p id="description-${id}" class="video-description text-xs text-zinc-200 mt-2 hidden">${description}</p>
+                        </div>
+                        <div class="short-actions" onclick="event.stopPropagation()">
+                            <button type="button" onclick="event.stopPropagation(); openCreatorChannel('${jsAuthor}')" class="short-action" title="View @${author}'s Channel">
+                                ${renderAvatarHtml(rawAuthor, 'w-8 h-8', 'text-xs')}
+                            </button>
+                            <button type="button" class="short-action ${isLiked ? 'is-liked' : ''}" ${isLiked ? 'disabled' : ''} onclick="event.stopPropagation(); likeVideo(${id}, this)" aria-label="Like this Short">
+                                <i class="fa-solid fa-heart text-lg ${isLiked ? 'text-pink-500' : 'text-zinc-300'}"></i>
+                                <span class="like-count-${id}">${likes}</span>
+                            </button>
+                            <button type="button" class="short-action" onclick="event.stopPropagation(); openCommentsModal(${id}, event)" aria-label="Comments">
+                                <i class="fa-solid fa-comment-dots text-lg text-purple-300"></i>
+                                <span class="comment-count-${id}">${commentCount}</span>
+                            </button>
+                            <button type="button" class="short-action" onclick="event.stopPropagation(); shareVideo(${id}, event)" title="Share Link">
+                                <i class="fa-solid fa-share text-base text-sky-300"></i>
+                                <span>Share</span>
+                            </button>
+                            ${deleteBtnHtml}
+                        </div>
+                    </article>`;
+            } else {
+                const likeBtnClasses = isLiked
+                    ? 'flex items-center gap-2 rounded-xl border border-pink-500/60 bg-pink-500/15 px-3.5 py-2 text-xs sm:text-sm text-pink-300 cursor-default'
+                    : 'flex items-center gap-2 rounded-xl border border-zinc-700 px-3.5 py-2 text-xs sm:text-sm hover:border-purple-500 hover:text-purple-300 transition-colors';
 
-                            <div class="flex items-center gap-2">
-                                <button type="button" onclick="event.stopPropagation(); openCommentsModal(${id}, event)" class="flex items-center gap-2 rounded-xl border border-zinc-700 bg-zinc-900/80 px-3.5 py-2 text-xs sm:text-sm text-zinc-200 hover:border-purple-500 hover:text-purple-300 transition-colors">
-                                    <i class="fa-solid fa-comment-dots text-purple-400"></i>
-                                    <span class="comment-count-${id}">${commentCount}</span>
-                                    <span>Comments</span>
-                                </button>
+                const longDeleteBtn = isOwner ? `
+                    <button type="button" onclick="event.stopPropagation(); deleteVideo(${id}, '${escapeJsString(video.video_url)}', event)" class="flex items-center gap-2 rounded-xl border border-red-500/40 bg-red-950/50 px-3.5 py-2 text-xs sm:text-sm text-red-300 hover:bg-red-900/80 transition-colors">
+                        <i class="fa-solid fa-trash"></i>
+                        <span>Delete</span>
+                    </button>` : '';
 
-                                <button type="button" class="${likeBtnClasses}" ${isLiked ? 'disabled' : ''} onclick="event.stopPropagation(); likeVideo(${id}, this)">
-                                    <i class="fa-solid fa-heart ${isLiked ? 'text-pink-500' : 'text-pink-400'}"></i>
-                                    <span class="like-count-${id}">${likes}</span>
-                                    <span>${isLiked ? 'Liked' : 'Like'}</span>
-                                </button>
+                return `
+                    <article class="long-card" id="video-${id}">
+                        <div id="player-container-${id}" class="custom-video-container is-long paused" oncontextmenu="return false;">
+                            <video class="custom-player-video" data-src="${url}" playsinline preload="none" controlsList="nodownload" disablePictureInPicture aria-label="${title}"></video>
+                            <div class="big-play-btn player-big-play"><i class="fa-solid fa-play"></i></div>
+                            <div class="long-video-controls" onclick="event.stopPropagation()">
+                                <input type="range" min="0" max="100" value="0" class="long-progress-bar video-progress-bar">
+                                <div class="flex items-center justify-between text-xs text-zinc-300">
+                                    <div class="flex items-center gap-3">
+                                        <button type="button" class="player-play-pause text-purple-300 hover:text-white w-7 h-7 flex items-center justify-center rounded-lg bg-zinc-800/80"><i class="fa-solid fa-play text-xs"></i></button>
+                                        <button type="button" class="player-mute text-zinc-300 hover:text-white w-7 h-7 flex items-center justify-center rounded-lg bg-zinc-800/80"><i class="fa-solid fa-volume-high text-xs"></i></button>
+                                        <span class="player-time text-[10px] font-mono text-zinc-400">0:00 / 0:00</span>
+                                    </div>
+                                    <button type="button" class="player-fullscreen text-zinc-300 hover:text-white w-7 h-7 flex items-center justify-center rounded-lg bg-zinc-800/80"><i class="fa-solid fa-expand text-xs"></i></button>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                </article>`;
+                        <div class="p-4 sm:p-5">
+                            <div class="flex items-center justify-between gap-3 text-xs text-zinc-500 mb-2">
+                                <span class="px-2 py-1 rounded-full bg-purple-500/10 text-purple-300 font-bold">LONG VIDEO</span>
+                                <div class="flex items-center gap-3">
+                                    <span><i class="fa-solid fa-eye mr-1"></i><strong class="view-count-${id} text-zinc-300">${views}</strong> views</span>
+                                    <span>${escapeHtml(date)}</span>
+                                </div>
+                            </div>
+                            <button type="button" class="video-title-button text-base sm:text-lg" aria-expanded="false" onclick="event.stopPropagation(); toggleDescription(${id})">
+                                ${title} <i class="fa-solid fa-chevron-down text-xs ml-1"></i>
+                            </button>
+
+                            <p id="description-${id}" class="video-description text-sm text-zinc-300 mt-3 hidden">${description}</p>
+
+                            <div class="flex items-center justify-between gap-2 flex-wrap border-t border-zinc-800 mt-4 pt-3">
+                                <button type="button" onclick="event.stopPropagation(); openCreatorChannel('${jsAuthor}')" class="creator-chip" title="Visit @${author}'s channel">
+                                    ${renderAvatarHtml(rawAuthor, 'w-7 h-7', 'text-xs')}
+                                    <div class="text-left pr-1">
+                                        <div class="text-xs font-extrabold text-white hover:text-purple-300 flex items-center">
+                                            <span>@${author}</span>${renderVerifiedBadge(rawAuthor)}
+                                        </div>
+                                        <div class="text-[10px] text-purple-400">View Channel</div>
+                                    </div>
+                                </button>
+
+                                <div class="flex items-center gap-2">
+                                    <button type="button" onclick="event.stopPropagation(); openCommentsModal(${id}, event)" class="flex items-center gap-2 rounded-xl border border-zinc-700 bg-zinc-900/80 px-3.5 py-2 text-xs sm:text-sm text-zinc-200 hover:border-purple-500 hover:text-purple-300 transition-colors">
+                                        <i class="fa-solid fa-comment-dots text-purple-400"></i>
+                                        <span class="comment-count-${id}">${commentCount}</span>
+                                        <span>Comments</span>
+                                    </button>
+
+                                    <button type="button" onclick="event.stopPropagation(); shareVideo(${id}, event)" class="flex items-center gap-2 rounded-xl border border-zinc-700 bg-zinc-900/80 px-3 py-2 text-xs sm:text-sm text-sky-300 hover:border-sky-500 transition-colors" title="Share Link">
+                                        <i class="fa-solid fa-share"></i>
+                                    </button>
+
+                                    <button type="button" class="${likeBtnClasses}" ${isLiked ? 'disabled' : ''} onclick="event.stopPropagation(); likeVideo(${id}, this)">
+                                        <i class="fa-solid fa-heart ${isLiked ? 'text-pink-500' : 'text-pink-400'}"></i>
+                                        <span class="like-count-${id}">${likes}</span>
+                                        <span>${isLiked ? 'Liked' : 'Like'}</span>
+                                    </button>
+                                    ${longDeleteBtn}
+                                </div>
+                            </div>
+                        </div>
+                    </article>`;
+            }
         }
 
         function toggleDescription(id) {
