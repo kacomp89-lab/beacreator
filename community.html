@@ -43,7 +43,6 @@
             color: #f4f4f5;
             overflow-x: hidden;
         }
-        /* Low-end device friendly shadows & surfaces */
         .neon-glow { box-shadow: 0 4px 16px rgba(0, 0, 0, 0.45); }
         .neon-glow-sm { box-shadow: 0 2px 8px rgba(139, 92, 246, 0.25); }
         .glass-panel {
@@ -114,15 +113,15 @@
             position: absolute;
             z-index: 3;
             right: 12px;
-            bottom: 24px;
+            bottom: 20px;
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 16px;
+            gap: 12px;
         }
         .short-action {
-            width: 48px;
-            min-height: 48px;
+            width: 46px;
+            min-height: 46px;
             border-radius: 999px;
             background: rgba(24, 24, 27, .9);
             border: 1px solid rgba(255, 255, 255, .16);
@@ -182,10 +181,10 @@
         .creator-chip {
             display: inline-flex;
             align-items: center;
-            gap: 8px;
+            gap: 7px;
             padding: 4px 10px 4px 4px;
             border-radius: 999px;
-            background: rgba(24, 24, 27, 0.85);
+            background: rgba(24, 24, 27, 0.88);
             border: 1px solid rgba(168, 85, 247, 0.3);
             transition: border-color 0.15s, background-color 0.15s;
             cursor: pointer;
@@ -193,6 +192,12 @@
         .creator-chip:hover {
             border-color: #a855f7;
             background: rgba(88, 28, 135, 0.45);
+        }
+        .verified-icon {
+            color: #38bdf8;
+            font-size: 12px;
+            margin-left: 3px;
+            filter: drop-shadow(0 0 4px rgba(56, 189, 248, 0.4));
         }
         @media (max-width: 850px) {
             .feed-columns { grid-template-columns: minmax(0, 1fr); }
@@ -212,14 +217,14 @@
                 border-radius: 16px;
             }
             .short-meta { left: 12px; right: 64px; bottom: 14px; }
-            .short-actions { right: 8px; bottom: 18px; }
+            .short-actions { right: 8px; bottom: 16px; }
         }
     </style>
 </head>
 <body class="bg-[#09090b] text-zinc-100 min-h-screen flex flex-col selection:bg-purple-500 selection:text-white">
 
     <!-- HEADER -->
-    <header class="sticky top-0 z-50 glass-panel border-b border-zinc-800/80 px-4 lg:px-8 py-3 flex items-center justify-between gap-2">
+    <header class="sticky top-0 z-40 glass-panel border-b border-zinc-800/80 px-4 lg:px-8 py-3 flex items-center justify-between gap-2">
         <div class="flex items-center space-x-3 cursor-pointer" onclick="showMainFeed()">
             <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-purple-600 via-indigo-600 to-pink-500 flex items-center justify-center neon-glow-sm">
                 <i class="fa-solid fa-wand-magic-sparkles text-white text-lg"></i>
@@ -245,7 +250,6 @@
             </button>
         </nav>
 
-        <!-- Right Actions: Channel Setup/Profile Button + Upload Video -->
         <div class="flex items-center space-x-2 sm:space-x-3">
             <button id="header-profile-btn" onclick="openProfileModal()" class="px-3 py-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-200 font-bold text-xs transition-colors flex items-center space-x-2">
                 <img id="header-avatar-img" src="" alt="Avatar" class="w-6 h-6 rounded-full object-cover hidden border border-purple-500">
@@ -260,9 +264,7 @@
         </div>
     </header>
 
-    <!-- ========================================== -->
-    <!-- VIEW 1: MAIN COMMUNITY FEED                -->
-    <!-- ========================================== -->
+    <!-- VIEW 1: MAIN COMMUNITY FEED -->
     <main id="feed-view" class="flex-1 max-w-6xl w-full mx-auto p-4 lg:p-6 pb-28 space-y-6">
         <div class="relative overflow-hidden rounded-3xl bg-gradient-to-r from-purple-950/60 via-indigo-950/40 to-zinc-900 border border-purple-500/20 p-6 lg:p-8 neon-glow flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
             <div class="max-w-2xl space-y-2">
@@ -271,7 +273,7 @@
                     <span>Creator Showcase & Channels</span>
                 </div>
                 <h1 class="text-2xl lg:text-4xl font-extrabold text-white">Explore Creator Shorts & Channels</h1>
-                <p class="text-zinc-400 text-xs lg:text-sm">Click any creator's @username below a video to visit their channel, read their bio, and follow them.</p>
+                <p class="text-zinc-400 text-xs lg:text-sm">Click any creator's @username to visit their channel, drop comments on videos, and follow top creators.</p>
             </div>
             <div class="flex flex-wrap gap-2">
                 <button onclick="openProfileModal()" class="px-4 py-2.5 rounded-xl bg-zinc-900/90 hover:bg-zinc-800 border border-purple-500/40 text-purple-200 text-xs font-bold flex items-center gap-2">
@@ -281,14 +283,12 @@
             </div>
         </div>
 
-        <!-- Feed filters -->
         <div class="flex flex-wrap items-center gap-2 border-b border-zinc-800 pb-3">
             <button onclick="filterVideos('all')" id="filter-all" class="px-4 py-2 rounded-xl bg-purple-600 text-white text-xs font-bold transition-colors"><i class="fa-solid fa-layer-group mr-2"></i>All Videos</button>
             <button onclick="filterVideos('short')" id="filter-short" class="px-4 py-2 rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white text-xs font-bold transition-colors"><i class="fa-solid fa-mobile-screen mr-2"></i>Shorts / Reels</button>
             <button onclick="filterVideos('long')" id="filter-long" class="px-4 py-2 rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white text-xs font-bold transition-colors"><i class="fa-solid fa-tv mr-2"></i>Long Videos</button>
         </div>
 
-        <!-- Separate Shorts and Long Video columns -->
         <div id="feed-columns" class="feed-columns">
             <section id="shorts-column" class="feed-column">
                 <div class="column-heading">
@@ -307,39 +307,39 @@
         </div>
     </main>
 
-    <!-- ========================================== -->
     <!-- VIEW 2: YOUTUBE-STYLE CREATOR CHANNEL PAGE -->
-    <!-- ========================================== -->
     <section id="channel-view" class="flex-1 max-w-6xl w-full mx-auto p-4 lg:p-6 pb-28 space-y-6 hidden">
-        <!-- Back to Feed Bar -->
-        <div class="flex items-center justify-between">
+        <div class="flex items-center justify-between flex-wrap gap-2">
             <button onclick="showMainFeed()" class="px-3.5 py-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-xs font-bold text-zinc-300 flex items-center gap-2">
                 <i class="fa-solid fa-arrow-left text-purple-400"></i>
                 <span>Back to Global Feed</span>
             </button>
-            <button id="channel-edit-own-btn" onclick="openProfileModal()" class="hidden px-3.5 py-2 rounded-xl bg-purple-600/20 border border-purple-500/40 text-purple-300 hover:bg-purple-600/30 text-xs font-bold flex items-center gap-2">
-                <i class="fa-solid fa-pen"></i>
-                <span>Edit My Channel</span>
-            </button>
+            <div class="flex items-center gap-2">
+                <button id="channel-admin-verify-btn" onclick="toggleCreatorVerifiedAdmin()" class="px-3.5 py-2 rounded-xl bg-sky-950/70 hover:bg-sky-900/80 border border-sky-500/40 text-sky-300 text-xs font-bold flex items-center gap-1.5" title="Owner Only: Grant or Remove Verified Badge">
+                    <i class="fa-solid fa-shield-halved"></i>
+                    <span id="channel-admin-verify-text">Grant Verified</span>
+                </button>
+                <button id="channel-edit-own-btn" onclick="openProfileModal()" class="hidden px-3.5 py-2 rounded-xl bg-purple-600/20 border border-purple-500/40 text-purple-300 hover:bg-purple-600/30 text-xs font-bold flex items-center gap-2">
+                    <i class="fa-solid fa-pen"></i>
+                    <span>Edit My Channel</span>
+                </button>
+            </div>
         </div>
 
-        <!-- YouTube-Style Channel Banner & Header -->
         <div class="rounded-3xl overflow-hidden border border-zinc-800 bg-[#121216] neon-glow">
-            <!-- Banner -->
             <div class="h-32 sm:h-44 bg-gradient-to-r from-purple-900 via-indigo-900 to-pink-900 relative">
                 <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.12),transparent_60%)]"></div>
             </div>
 
-            <!-- Channel Info Bar -->
             <div class="p-5 sm:p-8 -mt-12 sm:-mt-14 relative flex flex-col sm:flex-row sm:items-end justify-between gap-5">
                 <div class="flex flex-col sm:flex-row sm:items-end gap-4 sm:gap-5">
-                    <div id="channel-logo-wrapper" class="w-24 h-24 sm:w-28 sm:h-28 rounded-full border-4 border-[#121216] bg-zinc-800 overflow-hidden flex items-center justify-center shrink-0 shadow-xl">
-                        <!-- Populated dynamically -->
-                    </div>
+                    <div id="channel-logo-wrapper" class="w-24 h-24 sm:w-28 sm:h-28 rounded-full border-4 border-[#121216] bg-zinc-800 overflow-hidden flex items-center justify-center shrink-0 shadow-xl"></div>
                     <div class="space-y-1.5">
                         <div class="flex items-center gap-2 flex-wrap">
                             <h1 id="channel-display-title" class="text-2xl sm:text-3xl font-extrabold text-white">@Creator</h1>
-                            <span class="px-2.5 py-0.5 text-[11px] font-bold rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30"><i class="fa-solid fa-circle-check mr-1"></i>Creator</span>
+                            <span id="channel-verified-pill" class="hidden px-2.5 py-0.5 text-[11px] font-extrabold rounded-full bg-sky-500/20 text-sky-300 border border-sky-400/40 flex items-center gap-1">
+                                <i class="fa-solid fa-circle-check text-sky-400"></i> Verified Creator
+                            </span>
                         </div>
                         <div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-zinc-400 font-semibold">
                             <span><strong id="channel-followers-count" class="text-white">0</strong> Followers</span>
@@ -352,7 +352,6 @@
                     </div>
                 </div>
 
-                <!-- Follow / Subscribe Action -->
                 <div class="flex items-center gap-3">
                     <button id="channel-follow-btn" onclick="toggleFollowCurrentChannel()" class="px-6 py-3 rounded-full font-extrabold text-xs sm:text-sm transition-colors flex items-center gap-2 bg-white text-black hover:bg-zinc-200">
                         <i class="fa-solid fa-user-plus"></i>
@@ -361,7 +360,6 @@
                 </div>
             </div>
 
-            <!-- Channel Navigation Tabs -->
             <div class="px-5 sm:px-8 border-t border-zinc-800/80 flex items-center gap-2 overflow-x-auto py-2.5">
                 <button onclick="switchChannelTab('videos')" id="ch-tab-videos" class="px-4 py-2 rounded-xl text-xs font-bold bg-purple-600 text-white shrink-0">
                     <i class="fa-solid fa-play mr-1.5"></i>Uploads
@@ -375,7 +373,6 @@
             </div>
         </div>
 
-        <!-- TAB 1: Channel Uploads (Shorts + Long Videos) -->
         <div id="channel-panel-videos" class="space-y-6">
             <div class="feed-columns">
                 <div class="feed-column">
@@ -393,7 +390,6 @@
             </div>
         </div>
 
-        <!-- TAB 2: Followers List ("Who Followed This Channel") -->
         <div id="channel-panel-followers" class="hidden">
             <div class="glass-panel rounded-3xl p-6 space-y-4">
                 <div class="flex items-center justify-between border-b border-zinc-800 pb-3">
@@ -402,13 +398,10 @@
                         <p class="text-xs text-zinc-400">Click any follower below to visit their creator channel.</p>
                     </div>
                 </div>
-                <div id="channel-followers-list" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-                    <!-- Populated dynamically -->
-                </div>
+                <div id="channel-followers-list" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3"></div>
             </div>
         </div>
 
-        <!-- TAB 3: About Yourself Section -->
         <div id="channel-panel-about" class="hidden">
             <div class="glass-panel rounded-3xl p-6 space-y-4">
                 <h3 class="text-lg font-extrabold text-white border-b border-zinc-800 pb-3"><i class="fa-solid fa-address-card text-purple-400 mr-2"></i>About This Creator</h3>
@@ -424,9 +417,37 @@
         </div>
     </section>
 
-    <!-- ========================================== -->
-    <!-- MODAL 1: CREATE / EDIT CHANNEL PROFILE     -->
-    <!-- ========================================== -->
+    <!-- MODAL 1: COMMENTS DRAWER -->
+    <div id="comments-modal" class="fixed inset-0 z-50 bg-black/80 flex items-end sm:items-center justify-center p-0 sm:p-4 hidden">
+        <div class="glass-panel w-full max-w-lg rounded-t-3xl sm:rounded-3xl border border-purple-500/30 neon-glow flex flex-col max-h-[82vh] overflow-hidden">
+            <div class="px-5 py-4 border-b border-zinc-800 flex items-center justify-between">
+                <div>
+                    <h3 class="text-base font-extrabold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-comments text-purple-400"></i>
+                        <span>Video Comments</span>
+                        <span id="comments-modal-count" class="px-2 py-0.5 text-xs rounded-full bg-purple-500/20 text-purple-300">0</span>
+                    </h3>
+                    <p id="comments-modal-video-title" class="text-xs text-zinc-400 truncate max-w-xs sm:max-w-sm mt-0.5"></p>
+                </div>
+                <button onclick="closeCommentsModal()" class="w-8 h-8 rounded-full bg-zinc-800 hover:bg-zinc-700 text-zinc-300 flex items-center justify-center">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <div id="comments-list" class="flex-1 overflow-y-auto p-4 space-y-3 min-h-[220px]">
+                <div class="empty-state">Loading comments...</div>
+            </div>
+
+            <form onsubmit="handlePostComment(event)" class="p-3.5 border-t border-zinc-800 bg-zinc-950/90 flex items-center gap-2">
+                <input type="text" id="comment-input" required maxlength="300" placeholder="Add feedback or comment on this video..." class="flex-1 bg-zinc-900 border border-zinc-800 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-white focus:outline-none focus:border-purple-500">
+                <button type="submit" id="comment-submit-btn" class="px-4 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs sm:text-sm shrink-0 transition-colors">
+                    Post
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL 2: CREATE / EDIT CHANNEL PROFILE -->
     <div id="profile-modal" class="fixed inset-0 z-50 bg-black/85 flex items-center justify-center p-4 hidden overflow-y-auto">
         <div class="glass-panel w-full max-w-lg p-6 rounded-3xl border border-purple-500/30 neon-glow space-y-4 relative my-8">
             <div class="flex items-center justify-between">
@@ -435,9 +456,8 @@
             </div>
 
             <form onsubmit="handleSaveProfile(event)" class="space-y-4">
-                <!-- Channel Logo Picker -->
                 <div class="flex items-center gap-4 p-3 rounded-2xl bg-zinc-900/90 border border-zinc-800">
-                    <div id="profile-preview-box" class="w-16 h-16 rounded-full bg-purple-900/40 border-2 border-purple-500 flex items-center justify-center overflow-hidden shrink-0">
+                    <div class="w-16 h-16 rounded-full bg-purple-900/40 border-2 border-purple-500 flex items-center justify-center overflow-hidden shrink-0">
                         <img id="profile-logo-preview" src="" alt="Preview" class="w-full h-full object-cover hidden">
                         <i id="profile-logo-placeholder" class="fa-solid fa-camera text-purple-300 text-xl"></i>
                     </div>
@@ -448,7 +468,6 @@
                     </div>
                 </div>
 
-                <!-- Username -->
                 <div class="space-y-1.5">
                     <label class="text-xs font-semibold text-zinc-300">Channel Username (Unique Handle)</label>
                     <div class="relative">
@@ -457,13 +476,11 @@
                     </div>
                 </div>
 
-                <!-- Short Bio -->
                 <div class="space-y-1.5">
                     <label class="text-xs font-semibold text-zinc-300">Short Bio (Shown under channel header)</label>
                     <input type="text" id="profile-bio" maxlength="120" placeholder="e.g., Daily Tech Shorts & Filmmaking Breakdowns" class="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-purple-500">
                 </div>
 
-                <!-- About Yourself -->
                 <div class="space-y-1.5">
                     <label class="text-xs font-semibold text-zinc-300">About Yourself (Full Channel Story, Gear & Links)</label>
                     <textarea id="profile-about" rows="4" maxlength="800" placeholder="Tell viewers about yourself, your editing software, upload schedule, and goals..." class="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-purple-500 resize-none"></textarea>
@@ -481,9 +498,7 @@
         </div>
     </div>
 
-    <!-- ========================================== -->
-    <!-- MODAL 2: UPLOAD VIDEO                      -->
-    <!-- ========================================== -->
+    <!-- MODAL 3: UPLOAD VIDEO -->
     <div id="upload-modal" class="fixed inset-0 z-50 bg-black/85 flex items-center justify-center p-4 hidden">
         <div class="glass-panel w-full max-w-lg p-6 rounded-3xl border border-purple-500/30 neon-glow space-y-4 relative">
             <div class="flex items-center justify-between">
@@ -522,14 +537,18 @@
 
     <!-- SCRIPT -->
     <script>
-        // YOUR SUPABASE URL AND PUBLISHABLE ANON KEY
         const SUPABASE_URL = "https://kdanylytvxsktgosvgjw.supabase.co";
         const SUPABASE_ANON_KEY = "sb_publishable_bhk8btpWpfdFtgxnkV05-w_rbkKl3Ye";
 
+        const OWNER_VERIFIED_USERS = [
+            "beacreator",
+            "kcazfilm"
+        ];
+
+        const ADMIN_SECRET_PIN = "1234";
+
         const LIKED_STORAGE_KEY = "beacreator_liked_ids";
-        const PROFILE_STORAGE_KEY = "beacreator_channel_profile";
-        const LOCAL_PROFILES_MAP_KEY = "beacreator_all_profiles_cache";
-        const LOCAL_FOLLOWS_KEY = "beacreator_follows_cache";
+        const ACTIVE_USER_KEY = "beacreator_active_username";
 
         let supabaseClient = null;
         try {
@@ -542,50 +561,23 @@
 
         let currentFilter = 'all';
         let allVideosCache = [];
-        let profilesMap = {}; // username -> { username, bio, about, logo_url }
-        let followsList = []; // array of { follower_username, following_username, follower_logo }
+        let profilesMap = {};
+        let followsList = [];
+        let commentsByVideoId = {};
         let activeChannelUsername = null;
+        let activeCommentVideoId = null;
         let pendingLogoDataUrl = '';
         let videoObserver = null;
         const likingInProgress = new Set();
 
-        // ==========================================
-        // INITIALIZATION
-        // ==========================================
         window.addEventListener('DOMContentLoaded', async () => {
-            loadLocalCaches();
-            updateHeaderProfileUI();
             setupVideoObserver();
             await Promise.all([
-                loadAllProfilesAndFollows(),
+                loadAllProfilesFollowsAndComments(),
                 loadGlobalVideos(true)
             ]);
+            updateHeaderProfileUI();
         });
-
-        function loadLocalCaches() {
-            try {
-                const savedMap = localStorage.getItem(LOCAL_PROFILES_MAP_KEY);
-                if (savedMap) profilesMap = JSON.parse(savedMap) || {};
-                const myProfile = getMyProfile();
-                if (myProfile && myProfile.username) {
-                    profilesMap[myProfile.username.toLowerCase()] = myProfile;
-                }
-                const savedFollows = localStorage.getItem(LOCAL_FOLLOWS_KEY);
-                if (savedFollows) followsList = JSON.parse(savedFollows) || [];
-            } catch (_) {}
-        }
-
-        function getMyProfile() {
-            try {
-                const raw = localStorage.getItem(PROFILE_STORAGE_KEY);
-                if (raw) return JSON.parse(raw);
-                const legacyName = localStorage.getItem('beacreator_user_name');
-                if (legacyName) {
-                    return { username: cleanUsername(legacyName), bio: '', about: '', logo_url: '' };
-                }
-            } catch (_) {}
-            return null;
-        }
 
         function cleanUsername(input) {
             return String(input || '')
@@ -596,9 +588,93 @@
                 .slice(0, 32);
         }
 
-        // ==========================================
-        // CHANNEL PROFILE & LOGO CREATION
-        // ==========================================
+        function getActiveUsername() {
+            return cleanUsername(localStorage.getItem(ACTIVE_USER_KEY) || localStorage.getItem('beacreator_user_name') || '');
+        }
+
+        function getMyProfile() {
+            const uname = getActiveUsername();
+            if (!uname) return null;
+            return profilesMap[uname.toLowerCase()] || {
+                username: uname,
+                bio: '',
+                about: '',
+                logo_url: '',
+                is_verified: isCreatorVerified(uname)
+            };
+        }
+
+        function isCreatorVerified(username) {
+            const key = String(username || '').trim().toLowerCase();
+            if (!key) return false;
+            if (OWNER_VERIFIED_USERS.map(u => u.toLowerCase()).includes(key)) return true;
+            const prof = profilesMap[key];
+            return Boolean(prof && prof.is_verified === true);
+        }
+
+        function renderVerifiedBadge(username) {
+            if (!isCreatorVerified(username)) return '';
+            return `<i class="fa-solid fa-circle-check verified-icon" title="Verified Creator"></i>`;
+        }
+
+        async function loadAllProfilesFollowsAndComments() {
+            if (!supabaseClient) return;
+
+            try {
+                const { data: profiles } = await supabaseClient.from('profiles').select('*');
+                if (Array.isArray(profiles)) {
+                    profiles.forEach(p => {
+                        if (p.username) profilesMap[p.username.toLowerCase()] = p;
+                    });
+                }
+            } catch (_) {}
+
+            try {
+                const { data: follows } = await supabaseClient
+                    .from('follows')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+                if (Array.isArray(follows)) followsList = follows;
+            } catch (_) {}
+
+            try {
+                const { data: comments } = await supabaseClient
+                    .from('comments')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+                commentsByVideoId = {};
+                if (Array.isArray(comments)) {
+                    comments.forEach(c => {
+                        const vid = Number(c.video_id);
+                        if (!commentsByVideoId[vid]) commentsByVideoId[vid] = [];
+                        commentsByVideoId[vid].push(c);
+                    });
+                }
+            } catch (_) {}
+        }
+
+        function getCreatorProfile(username) {
+            const key = String(username || 'Creator').toLowerCase();
+            return profilesMap[key] || {
+                username: username || 'Creator',
+                bio: 'Creator on BeaCreator Community Hub',
+                about: 'This creator has not added a detailed About section yet.',
+                logo_url: '',
+                is_verified: isCreatorVerified(username)
+            };
+        }
+
+        function renderAvatarHtml(username, sizeClass = 'w-6 h-6', textClass = 'text-xs') {
+            const prof = getCreatorProfile(username);
+            const safeName = escapeHtml(prof.username || username || 'C');
+            if (prof.logo_url && (prof.logo_url.startsWith('data:image/') || safeVideoUrl(prof.logo_url))) {
+                const src = prof.logo_url.startsWith('data:image/') ? prof.logo_url : safeVideoUrl(prof.logo_url);
+                return `<img src="${src}" alt="${safeName}" class="${sizeClass} rounded-full object-cover border border-purple-500/50 shrink-0">`;
+            }
+            const initial = safeName.charAt(0).toUpperCase();
+            return `<div class="${sizeClass} rounded-full bg-gradient-to-tr from-purple-600 to-pink-500 text-white font-extrabold ${textClass} flex items-center justify-center shrink-0">${initial}</div>`;
+        }
+
         function updateHeaderProfileUI() {
             const myProfile = getMyProfile();
             const textEl = document.getElementById('header-username-text');
@@ -606,7 +682,7 @@
             const iconEl = document.getElementById('header-avatar-icon');
 
             if (myProfile && myProfile.username) {
-                textEl.textContent = `@${myProfile.username}`;
+                textEl.innerHTML = `@${escapeHtml(myProfile.username)}${renderVerifiedBadge(myProfile.username)}`;
                 if (myProfile.logo_url) {
                     imgEl.src = myProfile.logo_url;
                     imgEl.classList.remove('hidden');
@@ -656,7 +732,6 @@
             document.getElementById('profile-modal').classList.add('hidden');
         }
 
-        // Compress channel logo into a fast 160x160 circular-ready WebP/JPEG data URL
         function previewChannelLogo(event) {
             const file = event.target.files && event.target.files[0];
             if (!file) return;
@@ -670,8 +745,6 @@
                     canvas.width = size;
                     canvas.height = size;
                     const ctx = canvas.getContext('2d');
-
-                    // Center-crop square
                     const minSide = Math.min(img.width, img.height);
                     const sx = (img.width - minSide) / 2;
                     const sy = (img.height - minSide) / 2;
@@ -703,115 +776,105 @@
             }
 
             btn.disabled = true;
-            btn.textContent = 'Saving Channel...';
+            btn.textContent = 'Saving to Supabase...';
 
+            const currentlyVerified = isCreatorVerified(username);
             const profileData = {
                 username,
                 bio,
                 about,
-                logo_url: pendingLogoDataUrl || ''
+                logo_url: pendingLogoDataUrl || '',
+                is_verified: currentlyVerified
             };
 
-            // Save locally immediately
-            localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(profileData));
-            localStorage.setItem('beacreator_user_name', username);
-            profilesMap[username.toLowerCase()] = profileData;
-            localStorage.setItem(LOCAL_PROFILES_MAP_KEY, JSON.stringify(profilesMap));
-
-            // Save globally to Supabase profiles table if available
-            if (supabaseClient) {
-                try {
-                    await supabaseClient
+            try {
+                if (supabaseClient) {
+                    const { error } = await supabaseClient
                         .from('profiles')
                         .upsert([profileData], { onConflict: 'username' });
-                } catch (err) {
-                    console.warn('Supabase profiles sync notice:', err.message);
+                    if (error) throw error;
                 }
+                localStorage.setItem(ACTIVE_USER_KEY, username);
+                localStorage.setItem('beacreator_user_name', username);
+                profilesMap[username.toLowerCase()] = profileData;
+
+                updateHeaderProfileUI();
+                closeProfileModal();
+                renderFeedsFromCache();
+                if (activeChannelUsername && activeChannelUsername.toLowerCase() === username.toLowerCase()) {
+                    openCreatorChannel(username);
+                }
+            } catch (err) {
+                alert('Could not save channel to Supabase: ' + (err.message || 'Check profiles table SQL.'));
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Save Channel Profile';
+            }
+        }
+
+        async function toggleCreatorVerifiedAdmin() {
+            if (!activeChannelUsername || !supabaseClient) return;
+            const enteredPin = prompt(`Owner Verification Control for @${activeChannelUsername}\nEnter Admin PIN:`);
+            if (enteredPin === null) return;
+            if (enteredPin !== ADMIN_SECRET_PIN) {
+                alert('Invalid Admin PIN.');
+                return;
             }
 
-            btn.disabled = false;
-            btn.textContent = 'Save Channel Profile';
-            updateHeaderProfileUI();
-            closeProfileModal();
-            renderFeedsFromCache();
+            const targetKey = activeChannelUsername.toLowerCase();
+            const existing = getCreatorProfile(activeChannelUsername);
+            const newVerifiedState = !isCreatorVerified(activeChannelUsername);
 
-            if (activeChannelUsername && activeChannelUsername.toLowerCase() === username.toLowerCase()) {
-                openCreatorChannel(username);
+            const updatedProfile = {
+                username: existing.username || activeChannelUsername,
+                bio: existing.bio || '',
+                about: existing.about || '',
+                logo_url: existing.logo_url || '',
+                is_verified: newVerifiedState
+            };
+
+            try {
+                const { error } = await supabaseClient
+                    .from('profiles')
+                    .upsert([updatedProfile], { onConflict: 'username' });
+                if (error) throw error;
+
+                profilesMap[targetKey] = updatedProfile;
+                updateHeaderProfileUI();
+                renderFeedsFromCache();
+                await openCreatorChannel(activeChannelUsername);
+                alert(newVerifiedState
+                    ? `@${activeChannelUsername} is now a Verified Creator!`
+                    : `Verified badge removed from @${activeChannelUsername}.`
+                );
+            } catch (err) {
+                alert('Failed to update verified status: ' + (err.message || 'Make sure is_verified column exists in profiles.'));
             }
         }
 
         function viewMySavedChannel() {
-            const myProfile = getMyProfile();
-            if (!myProfile || !myProfile.username) {
+            const uname = getActiveUsername();
+            if (!uname) {
                 alert('Save your username first to view your channel.');
                 return;
             }
             closeProfileModal();
-            openCreatorChannel(myProfile.username);
+            openCreatorChannel(uname);
         }
 
         function openMyChannelOrSetup() {
-            const myProfile = getMyProfile();
-            if (myProfile && myProfile.username) {
-                openCreatorChannel(myProfile.username);
+            const uname = getActiveUsername();
+            if (uname) {
+                openCreatorChannel(uname);
             } else {
                 openProfileModal();
             }
         }
 
-        // ==========================================
-        // LOAD PROFILES & FOLLOWERS FROM SUPABASE
-        // ==========================================
-        async function loadAllProfilesAndFollows() {
-            if (!supabaseClient) return;
-            try {
-                const { data: profiles } = await supabaseClient.from('profiles').select('*');
-                if (Array.isArray(profiles)) {
-                    profiles.forEach(p => {
-                        if (p.username) profilesMap[p.username.toLowerCase()] = p;
-                    });
-                    localStorage.setItem(LOCAL_PROFILES_MAP_KEY, JSON.stringify(profilesMap));
-                }
-            } catch (_) {}
-
-            try {
-                const { data: follows } = await supabaseClient.from('follows').select('*').order('created_at', { ascending: false });
-                if (Array.isArray(follows)) {
-                    followsList = follows;
-                    localStorage.setItem(LOCAL_FOLLOWS_KEY, JSON.stringify(followsList));
-                }
-            } catch (_) {}
-        }
-
-        function getCreatorProfile(username) {
-            const key = String(username || 'Creator').toLowerCase();
-            return profilesMap[key] || {
-                username: username || 'Creator',
-                bio: 'Creator on BeaCreator Community Hub',
-                about: 'This creator has not added a detailed About section yet.',
-                logo_url: ''
-            };
-        }
-
-        function renderAvatarHtml(username, sizeClass = 'w-6 h-6', textClass = 'text-xs') {
-            const prof = getCreatorProfile(username);
-            const safeName = escapeHtml(prof.username || username || 'C');
-            if (prof.logo_url && prof.logo_url.startsWith('data:image/') || safeVideoUrl(prof.logo_url)) {
-                const src = prof.logo_url.startsWith('data:image/') ? prof.logo_url : safeVideoUrl(prof.logo_url);
-                return `<img src="${src}" alt="${safeName}" class="${sizeClass} rounded-full object-cover border border-purple-500/50 shrink-0">`;
-            }
-            const initial = safeName.charAt(0).toUpperCase();
-            return `<div class="${sizeClass} rounded-full bg-gradient-to-tr from-purple-600 to-pink-500 text-white font-extrabold ${textClass} flex items-center justify-center shrink-0">${initial}</div>`;
-        }
-
-        // ==========================================
-        // YOUTUBE-STYLE CREATOR CHANNEL VIEW & FOLLOW
-        // ==========================================
         async function openCreatorChannel(username) {
             const cleanTarget = String(username || 'Creator').trim();
             activeChannelUsername = cleanTarget;
 
-            // Pause any playing feed videos
             document.querySelectorAll('video.lazy-video').forEach(v => {
                 if (!v.paused) v.pause();
             });
@@ -820,24 +883,23 @@
             document.getElementById('channel-view').classList.remove('hidden');
             window.scrollTo({ top: 0, behavior: 'smooth' });
 
-            // Refresh latest profile & followers from Supabase silently
-            await loadAllProfilesAndFollows();
+            await loadAllProfilesFollowsAndComments();
 
             const prof = getCreatorProfile(cleanTarget);
-            const myProfile = getMyProfile();
-            const isOwnChannel = myProfile && myProfile.username && myProfile.username.toLowerCase() === cleanTarget.toLowerCase();
+            const myUsername = getActiveUsername();
+            const isOwnChannel = myUsername && myUsername.toLowerCase() === cleanTarget.toLowerCase();
+            const verified = isCreatorVerified(cleanTarget);
 
-            // Header & Avatar
             document.getElementById('channel-logo-wrapper').innerHTML = renderAvatarHtml(cleanTarget, 'w-full h-full', 'text-3xl');
             document.getElementById('channel-display-title').textContent = `@${prof.username || cleanTarget}`;
+            document.getElementById('channel-verified-pill').classList.toggle('hidden', !verified);
+            document.getElementById('channel-admin-verify-text').textContent = verified ? 'Remove Verified' : 'Grant Verified';
+
             document.getElementById('channel-short-bio').textContent = prof.bio || 'Creator on BeaCreator Community Hub';
             document.getElementById('channel-about-bio').textContent = prof.bio || 'No short bio provided.';
             document.getElementById('channel-about-full').textContent = prof.about || 'No detailed About section added yet.';
-
-            // Show/hide Edit My Channel button
             document.getElementById('channel-edit-own-btn').classList.toggle('hidden', !isOwnChannel);
 
-            // Filter this creator's videos
             const creatorVideos = allVideosCache.filter(
                 v => String(v.author || 'Creator').toLowerCase() === cleanTarget.toLowerCase()
             );
@@ -848,13 +910,10 @@
             document.getElementById('channel-videos-count').textContent = String(creatorVideos.length);
             document.getElementById('channel-likes-count').textContent = String(totalLikes);
 
-            // Render Creator Uploads
-            const chShortsEl = document.getElementById('channel-shorts-feed');
-            const chLongsEl = document.getElementById('channel-long-feed');
-            chShortsEl.innerHTML = creatorShorts.length
+            document.getElementById('channel-shorts-feed').innerHTML = creatorShorts.length
                 ? creatorShorts.map(renderShort).join('')
                 : '<div class="empty-state">No Shorts uploaded by this channel yet.</div>';
-            chLongsEl.innerHTML = creatorLongs.length
+            document.getElementById('channel-long-feed').innerHTML = creatorLongs.length
                 ? creatorLongs.map(renderLong).join('')
                 : '<div class="empty-state">No long videos uploaded by this channel yet.</div>';
 
@@ -873,8 +932,7 @@
             document.getElementById('channel-followers-count').textContent = String(followers.length);
             document.getElementById('ch-tab-followers-badge').textContent = String(followers.length);
 
-            const myProfile = getMyProfile();
-            const myUsername = myProfile && myProfile.username ? myProfile.username : '';
+            const myUsername = getActiveUsername();
             const isFollowing = myUsername && followers.some(
                 f => String(f.follower_username || '').toLowerCase() === myUsername.toLowerCase()
             );
@@ -894,7 +952,6 @@
                 followBtn.onclick = toggleFollowCurrentChannel;
             }
 
-            // Populate "Who Followed" Grid
             const listContainer = document.getElementById('channel-followers-list');
             if (!followers.length) {
                 listContainer.innerHTML = '<div class="col-span-full empty-state">No followers yet. Be the first to follow this creator!</div>';
@@ -902,16 +959,19 @@
             }
 
             listContainer.innerHTML = followers.map(f => {
-                const fName = escapeHtml(f.follower_username || 'Creator');
-                const jsSafeName = escapeJsString(f.follower_username || 'Creator');
-                const fProf = getCreatorProfile(f.follower_username);
+                const rawFollower = f.follower_username || 'Creator';
+                const fName = escapeHtml(rawFollower);
+                const jsSafeName = escapeJsString(rawFollower);
+                const fProf = getCreatorProfile(rawFollower);
                 const subBio = escapeHtml(fProf.bio || 'Creator Channel');
                 return `
                     <div onclick="openCreatorChannel('${jsSafeName}')" class="p-3.5 rounded-2xl bg-zinc-900/90 hover:bg-zinc-800 border border-zinc-800 hover:border-purple-500/50 cursor-pointer flex items-center justify-between gap-3 transition-colors">
                         <div class="flex items-center gap-3 min-w-0">
-                            ${renderAvatarHtml(f.follower_username, 'w-11 h-11', 'text-sm')}
+                            ${renderAvatarHtml(rawFollower, 'w-11 h-11', 'text-sm')}
                             <div class="min-w-0">
-                                <div class="text-sm font-extrabold text-white truncate">@${fName}</div>
+                                <div class="text-sm font-extrabold text-white truncate flex items-center">
+                                    <span>@${fName}</span>${renderVerifiedBadge(rawFollower)}
+                                </div>
                                 <div class="text-[11px] text-zinc-400 truncate">${subBio}</div>
                             </div>
                         </div>
@@ -922,7 +982,7 @@
         }
 
         async function toggleFollowCurrentChannel() {
-            if (!activeChannelUsername) return;
+            if (!activeChannelUsername || !supabaseClient) return;
             const myProfile = getMyProfile();
             if (!myProfile || !myProfile.username) {
                 alert('Please create your channel username first so creators can see who followed them!');
@@ -943,22 +1003,16 @@
             );
 
             if (existingIndex >= 0) {
-                // Unfollow
                 followsList.splice(existingIndex, 1);
-                localStorage.setItem(LOCAL_FOLLOWS_KEY, JSON.stringify(followsList));
                 renderChannelFollowersUI();
-
-                if (supabaseClient) {
-                    try {
-                        await supabaseClient
-                            .from('follows')
-                            .delete()
-                            .eq('follower_username', follower)
-                            .eq('following_username', following);
-                    } catch (_) {}
-                }
+                try {
+                    await supabaseClient
+                        .from('follows')
+                        .delete()
+                        .eq('follower_username', follower)
+                        .eq('following_username', following);
+                } catch (_) {}
             } else {
-                // Follow (1 follow per user pair)
                 const newEntry = {
                     follower_username: follower,
                     following_username: following,
@@ -966,14 +1020,10 @@
                     created_at: new Date().toISOString()
                 };
                 followsList.unshift(newEntry);
-                localStorage.setItem(LOCAL_FOLLOWS_KEY, JSON.stringify(followsList));
                 renderChannelFollowersUI();
-
-                if (supabaseClient) {
-                    try {
-                        await supabaseClient.from('follows').insert([newEntry]);
-                    } catch (_) {}
-                }
+                try {
+                    await supabaseClient.from('follows').insert([newEntry]);
+                } catch (_) {}
             }
         }
 
@@ -997,9 +1047,141 @@
             observeFeedVideos();
         }
 
-        // ==========================================
-        // LOW-END DEVICE LAZY VIDEO OBSERVER
-        // ==========================================
+        function getCommentCount(videoId) {
+            const list = commentsByVideoId[Number(videoId)];
+            return Array.isArray(list) ? list.length : 0;
+        }
+
+        async function openCommentsModal(videoId) {
+            const numericId = Number(videoId);
+            if (!Number.isFinite(numericId)) return;
+            activeCommentVideoId = numericId;
+
+            const video = allVideosCache.find(v => Number(v.id) === numericId);
+            document.getElementById('comments-modal-video-title').textContent = video ? video.title : '';
+            document.getElementById('comments-modal').classList.remove('hidden');
+
+            renderCommentsModalList(numericId);
+
+            if (supabaseClient) {
+                try {
+                    const { data, error } = await supabaseClient
+                        .from('comments')
+                        .select('*')
+                        .eq('video_id', numericId)
+                        .order('created_at', { ascending: false });
+                    if (!error && Array.isArray(data)) {
+                        commentsByVideoId[numericId] = data;
+                        renderCommentsModalList(numericId);
+                        updateCommentCountBadges(numericId);
+                    }
+                } catch (_) {}
+            }
+        }
+
+        function closeCommentsModal() {
+            activeCommentVideoId = null;
+            document.getElementById('comments-modal').classList.add('hidden');
+        }
+
+        function renderCommentsModalList(videoId) {
+            const listEl = document.getElementById('comments-list');
+            const countBadge = document.getElementById('comments-modal-count');
+            const comments = commentsByVideoId[Number(videoId)] || [];
+
+            countBadge.textContent = String(comments.length);
+
+            if (!comments.length) {
+                listEl.innerHTML = '<div class="empty-state py-8">No comments yet. Drop the first feedback for this creator!</div>';
+                return;
+            }
+
+            listEl.innerHTML = comments.map(c => {
+                const rawAuthor = c.author || 'Creator';
+                const safeAuthor = escapeHtml(rawAuthor);
+                const jsAuthor = escapeJsString(rawAuthor);
+                const text = escapeHtml(c.content || '');
+                const date = c.created_at
+                    ? new Date(c.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
+                    : 'Just now';
+
+                return `
+                    <div class="p-3 rounded-2xl bg-zinc-900/90 border border-zinc-800/90 flex items-start gap-3">
+                        <div onclick="closeCommentsModal(); openCreatorChannel('${jsAuthor}')" class="cursor-pointer shrink-0">
+                            ${renderAvatarHtml(rawAuthor, 'w-8 h-8', 'text-xs')}
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-center justify-between gap-2">
+                                <button type="button" onclick="closeCommentsModal(); openCreatorChannel('${jsAuthor}')" class="text-xs font-extrabold text-white hover:text-purple-300 flex items-center">
+                                    <span>@${safeAuthor}</span>${renderVerifiedBadge(rawAuthor)}
+                                </button>
+                                <span class="text-[10px] text-zinc-500">${escapeHtml(date)}</span>
+                            </div>
+                            <p class="text-xs text-zinc-200 mt-1 break-words leading-relaxed">${text}</p>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        async function handlePostComment(event) {
+            event.preventDefault();
+            if (!activeCommentVideoId || !supabaseClient) return;
+
+            const myProfile = getMyProfile();
+            if (!myProfile || !myProfile.username) {
+                alert('Create your channel username first before posting a comment!');
+                closeCommentsModal();
+                openProfileModal();
+                return;
+            }
+
+            const input = document.getElementById('comment-input');
+            const submitBtn = document.getElementById('comment-submit-btn');
+            const content = input.value.trim();
+            if (!content) return;
+
+            submitBtn.disabled = true;
+            submitBtn.textContent = '...';
+
+            const newComment = {
+                video_id: activeCommentVideoId,
+                author: myProfile.username,
+                content
+            };
+
+            try {
+                const { data, error } = await supabaseClient
+                    .from('comments')
+                    .insert([newComment])
+                    .select('*')
+                    .single();
+
+                if (error) throw error;
+
+                if (!commentsByVideoId[activeCommentVideoId]) {
+                    commentsByVideoId[activeCommentVideoId] = [];
+                }
+                commentsByVideoId[activeCommentVideoId].unshift(data || { ...newComment, created_at: new Date().toISOString() });
+
+                input.value = '';
+                renderCommentsModalList(activeCommentVideoId);
+                updateCommentCountBadges(activeCommentVideoId);
+            } catch (err) {
+                alert('Could not post comment: ' + (err.message || 'Make sure you ran the comments SQL table script in Supabase.'));
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Post';
+            }
+        }
+
+        function updateCommentCountBadges(videoId) {
+            const count = getCommentCount(videoId);
+            document.querySelectorAll(`.comment-count-${videoId}`).forEach(el => {
+                el.textContent = String(count);
+            });
+        }
+
         function setupVideoObserver() {
             if (!('IntersectionObserver' in window)) return;
             videoObserver = new IntersectionObserver((entries) => {
@@ -1036,9 +1218,6 @@
             });
         }
 
-        // ==========================================
-        // UPLOAD VIDEO
-        // ==========================================
         function openUploadModal() {
             const myProfile = getMyProfile();
             if (!myProfile || !myProfile.username) {
@@ -1056,7 +1235,7 @@
         async function handleGlobalUpload(event) {
             event.preventDefault();
             if (!supabaseClient) {
-                alert('Supabase is not connected. Check the project URL and publishable key.');
+                alert('Supabase is not connected.');
                 return;
             }
 
@@ -1108,9 +1287,6 @@
             }
         }
 
-        // ==========================================
-        // FEED RENDERING & CLICKABLE CREATOR LINKS
-        // ==========================================
         function filterVideos(filter) {
             currentFilter = filter;
             ['all', 'short', 'long'].forEach(type => {
@@ -1194,6 +1370,7 @@
             const description = escapeHtml(video.description || 'No description added.');
             const url = safeVideoUrl(video.video_url);
             const likes = Math.max(0, Number(video.likes) || 0);
+            const commentCount = getCommentCount(id);
             const isLiked = hasUserLiked(id);
             const date = video.created_at
                 ? new Date(video.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
@@ -1209,11 +1386,13 @@
                         <div class="flex items-center gap-2 text-xs text-zinc-200 mb-2 flex-wrap">
                             <button type="button" onclick="openCreatorChannel('${jsAuthor}')" class="creator-chip" title="Visit @${author}'s channel">
                                 ${renderAvatarHtml(rawAuthor, 'w-6 h-6', 'text-[10px]')}
-                                <span class="font-extrabold text-white hover:text-purple-300">@${author}</span>
+                                <span class="font-extrabold text-white hover:text-purple-300 flex items-center">
+                                    <span>@${author}</span>${renderVerifiedBadge(rawAuthor)}
+                                </span>
                             </button>
                             <span class="text-zinc-400">· ${escapeHtml(date)}</span>
                         </div>
-                        <button type="button" class="video-title-button text-base" aria-expanded="false" onclick="toggleDescription(${id}, this)">
+                        <button type="button" class="video-title-button text-base" aria-expanded="false" onclick="toggleDescription(${id})">
                             ${title} <i class="fa-solid fa-chevron-down text-xs ml-1"></i>
                         </button>
                         <p id="description-${id}" class="video-description text-xs text-zinc-200 mt-2 hidden">${description}</p>
@@ -1223,12 +1402,16 @@
                             ${renderAvatarHtml(rawAuthor, 'w-8 h-8', 'text-xs')}
                         </button>
                         <button type="button" class="short-action ${isLiked ? 'is-liked' : ''}" ${isLiked ? 'disabled' : ''} onclick="likeVideo(${id}, this)" aria-label="Like this Short">
-                            <i class="fa-solid fa-heart text-xl ${isLiked ? 'text-pink-500' : 'text-zinc-300'}"></i>
+                            <i class="fa-solid fa-heart text-lg ${isLiked ? 'text-pink-500' : 'text-zinc-300'}"></i>
                             <span class="like-count-${id}">${likes}</span>
                         </button>
+                        <button type="button" class="short-action" onclick="openCommentsModal(${id})" aria-label="Comments">
+                            <i class="fa-solid fa-comment-dots text-lg text-purple-300"></i>
+                            <span class="comment-count-${id}">${commentCount}</span>
+                        </button>
                         <button type="button" class="short-action" onclick="toggleDescription(${id})" aria-label="Show description">
-                            <i class="fa-solid fa-align-left text-lg"></i>
-                            <span>Details</span>
+                            <i class="fa-solid fa-align-left text-base"></i>
+                            <span>Info</span>
                         </button>
                     </div>
                 </article>`;
@@ -1243,6 +1426,7 @@
             const description = escapeHtml(video.description || 'No description added.');
             const url = safeVideoUrl(video.video_url);
             const likes = Math.max(0, Number(video.likes) || 0);
+            const commentCount = getCommentCount(id);
             const isLiked = hasUserLiked(id);
             const date = video.created_at
                 ? new Date(video.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })
@@ -1251,8 +1435,8 @@
             if (!url || !Number.isFinite(id)) return '';
 
             const likeBtnClasses = isLiked
-                ? 'flex items-center gap-2 rounded-xl border border-pink-500/60 bg-pink-500/15 px-3.5 py-2 text-sm text-pink-300 cursor-default'
-                : 'flex items-center gap-2 rounded-xl border border-zinc-700 px-3.5 py-2 text-sm hover:border-purple-500 hover:text-purple-300 transition-colors';
+                ? 'flex items-center gap-2 rounded-xl border border-pink-500/60 bg-pink-500/15 px-3.5 py-2 text-xs sm:text-sm text-pink-300 cursor-default'
+                : 'flex items-center gap-2 rounded-xl border border-zinc-700 px-3.5 py-2 text-xs sm:text-sm hover:border-purple-500 hover:text-purple-300 transition-colors';
 
             return `
                 <article class="long-card">
@@ -1262,27 +1446,36 @@
                             <span class="px-2 py-1 rounded-full bg-purple-500/10 text-purple-300 font-bold">LONG VIDEO</span>
                             <span>${escapeHtml(date)}</span>
                         </div>
-                        <button type="button" class="video-title-button text-base sm:text-lg" aria-expanded="false" onclick="toggleDescription(${id}, this)">
+                        <button type="button" class="video-title-button text-base sm:text-lg" aria-expanded="false" onclick="toggleDescription(${id})">
                             ${title} <i class="fa-solid fa-chevron-down text-xs ml-1"></i>
                         </button>
 
                         <p id="description-${id}" class="video-description text-sm text-zinc-300 mt-3 hidden">${description}</p>
 
-                        <!-- Creator Channel Link & Like Bar -->
-                        <div class="flex items-center justify-between gap-3 border-t border-zinc-800 mt-4 pt-3">
+                        <div class="flex items-center justify-between gap-2 flex-wrap border-t border-zinc-800 mt-4 pt-3">
                             <button type="button" onclick="openCreatorChannel('${jsAuthor}')" class="creator-chip" title="Visit @${author}'s channel">
                                 ${renderAvatarHtml(rawAuthor, 'w-7 h-7', 'text-xs')}
                                 <div class="text-left pr-1">
-                                    <div class="text-xs font-extrabold text-white hover:text-purple-300">@${author}</div>
+                                    <div class="text-xs font-extrabold text-white hover:text-purple-300 flex items-center">
+                                        <span>@${author}</span>${renderVerifiedBadge(rawAuthor)}
+                                    </div>
                                     <div class="text-[10px] text-purple-400">View Channel</div>
                                 </div>
                             </button>
 
-                            <button type="button" class="${likeBtnClasses}" ${isLiked ? 'disabled' : ''} onclick="likeVideo(${id}, this)">
-                                <i class="fa-solid fa-heart ${isLiked ? 'text-pink-500' : 'text-pink-400'}"></i>
-                                <span class="like-count-${id}">${likes}</span>
-                                <span>${isLiked ? 'Liked' : 'Like'}</span>
-                            </button>
+                            <div class="flex items-center gap-2">
+                                <button type="button" onclick="openCommentsModal(${id})" class="flex items-center gap-2 rounded-xl border border-zinc-700 bg-zinc-900/80 px-3.5 py-2 text-xs sm:text-sm text-zinc-200 hover:border-purple-500 hover:text-purple-300 transition-colors">
+                                    <i class="fa-solid fa-comment-dots text-purple-400"></i>
+                                    <span class="comment-count-${id}">${commentCount}</span>
+                                    <span>Comments</span>
+                                </button>
+
+                                <button type="button" class="${likeBtnClasses}" ${isLiked ? 'disabled' : ''} onclick="likeVideo(${id}, this)">
+                                    <i class="fa-solid fa-heart ${isLiked ? 'text-pink-500' : 'text-pink-400'}"></i>
+                                    <span class="like-count-${id}">${likes}</span>
+                                    <span>${isLiked ? 'Liked' : 'Like'}</span>
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </article>`;
@@ -1294,9 +1487,6 @@
             description.classList.toggle('hidden');
         }
 
-        // ==========================================
-        // ONE-LIKE-PER-USER SYSTEM
-        // ==========================================
         function getLikedSet() {
             try {
                 const raw = localStorage.getItem(LIKED_STORAGE_KEY);
@@ -1330,7 +1520,6 @@
             likingInProgress.add(numericId);
             if (buttonEl) buttonEl.disabled = true;
 
-            // Update all matching counters on screen optimistically
             document.querySelectorAll(`.like-count-${numericId}`).forEach(el => {
                 el.textContent = String(current + 1);
             });
@@ -1362,9 +1551,6 @@
             }
         }
 
-        // ==========================================
-        // HELPERS
-        // ==========================================
         function safeVideoUrl(value) {
             try {
                 const parsed = new URL(value, window.location.href);
