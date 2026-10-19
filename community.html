@@ -199,6 +199,94 @@
             margin-left: 3px;
             filter: drop-shadow(0 0 4px rgba(56, 189, 248, 0.4));
         }
+
+        /* CUSTOM THEMED VIDEO PLAYER CONTROLS */
+        .custom-video-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            overflow: hidden;
+        }
+        .custom-video-container.is-long {
+            aspect-ratio: 16/9;
+            height: auto;
+        }
+        .custom-video-container video {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            display: block;
+        }
+        .video-overlay-controls {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to top, rgba(9, 9, 11, 0.92), rgba(9, 9, 11, 0.5), transparent);
+            padding: 24px 14px 12px 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            opacity: 0;
+            transition: opacity 0.25s ease-in-out;
+            z-index: 10;
+            pointer-events: none;
+        }
+        .custom-video-container:hover .video-overlay-controls,
+        .custom-video-container.paused .video-overlay-controls,
+        .custom-video-container.touch-active .video-overlay-controls {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .video-progress-bar {
+            appearance: none;
+            -webkit-appearance: none;
+            width: 100%;
+            height: 5px;
+            background: rgba(255, 255, 255, 0.25);
+            border-radius: 999px;
+            outline: none;
+            cursor: pointer;
+            transition: height 0.15s;
+        }
+        .video-progress-bar:hover { height: 7px; }
+        .video-progress-bar::-webkit-slider-thumb {
+            appearance: none;
+            -webkit-appearance: none;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #c084fc;
+            box-shadow: 0 0 10px #8b5cf6;
+            cursor: pointer;
+        }
+        .big-play-btn {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 0, 0, 0.35);
+            cursor: pointer;
+            transition: opacity 0.2s;
+            z-index: 5;
+        }
+        .big-play-btn i {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: rgba(139, 92, 246, 0.85);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            box-shadow: 0 0 20px rgba(139, 92, 246, 0.6);
+            transition: transform 0.15s, background 0.15s;
+        }
+        .big-play-btn:hover i { transform: scale(1.08); background: #7c3aed; }
+
         @media (max-width: 850px) {
             .feed-columns { grid-template-columns: minmax(0, 1fr); }
             .shorts-scroll { max-height: 75vh; }
@@ -875,7 +963,7 @@
             const cleanTarget = String(username || 'Creator').trim();
             activeChannelUsername = cleanTarget;
 
-            document.querySelectorAll('video.lazy-video').forEach(v => {
+            document.querySelectorAll('video.custom-player-video').forEach(v => {
                 if (!v.paused) v.pause();
             });
 
@@ -1182,11 +1270,99 @@
             });
         }
 
+        // CUSTOM VIDEO PLAYER CONTROLS IMPLEMENTATION
+        function initCustomPlayer(containerId) {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+            const video = container.querySelector('video');
+            const playPauseBtn = container.querySelector('.player-play-pause');
+            const bigPlayBtn = container.querySelector('.player-big-play');
+            const progressBar = container.querySelector('.video-progress-bar');
+            const timeDisplay = container.querySelector('.player-time');
+            const muteBtn = container.querySelector('.player-mute');
+            const fullscreenBtn = container.querySelector('.player-fullscreen');
+
+            if (!video) return;
+
+            function formatTime(seconds) {
+                if (isNaN(seconds)) return "0:00";
+                const mins = Math.floor(seconds / 60);
+                const secs = Math.floor(seconds % 60);
+                return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+            }
+
+            function togglePlay() {
+                if (video.paused) {
+                    // Pause all other custom videos
+                    document.querySelectorAll('video.custom-player-video').forEach(v => {
+                        if (v !== video && !v.paused) v.pause();
+                    });
+                    video.play().catch(() => {});
+                } else {
+                    video.pause();
+                }
+            }
+
+            if (bigPlayBtn) bigPlayBtn.addEventListener('click', togglePlay);
+            if (playPauseBtn) playPauseBtn.addEventListener('click', togglePlay);
+            video.addEventListener('click', togglePlay);
+
+            video.addEventListener('play', () => {
+                container.classList.remove('paused');
+                if (bigPlayBtn) bigPlayBtn.style.opacity = '0';
+                if (playPauseBtn) playPauseBtn.innerHTML = '<i class="fa-solid fa-pause text-sm"></i>';
+            });
+
+            video.addEventListener('pause', () => {
+                container.classList.add('paused');
+                if (bigPlayBtn) bigPlayBtn.style.opacity = '1';
+                if (playPauseBtn) playPauseBtn.innerHTML = '<i class="fa-solid fa-play text-sm"></i>';
+            });
+
+            video.addEventListener('timeupdate', () => {
+                if (!progressBar) return;
+                const percent = (video.currentTime / video.duration) * 100 || 0;
+                progressBar.value = percent;
+                if (timeDisplay) {
+                    timeDisplay.textContent = `${formatTime(video.currentTime)} / ${formatTime(video.duration)}`;
+                }
+            });
+
+            if (progressBar) {
+                progressBar.addEventListener('input', (e) => {
+                    const time = (e.target.value / 100) * video.duration;
+                    if (!isNaN(time)) video.currentTime = time;
+                });
+            }
+
+            if (muteBtn) {
+                muteBtn.addEventListener('click', () => {
+                    video.muted = !video.muted;
+                    muteBtn.innerHTML = video.muted
+                        ? '<i class="fa-solid fa-volume-xmark text-sm"></i>'
+                        : '<i class="fa-solid fa-volume-high text-sm"></i>';
+                });
+            }
+
+            if (fullscreenBtn) {
+                fullscreenBtn.addEventListener('click', () => {
+                    if (video.requestFullscreen) {
+                        video.requestFullscreen();
+                    } else if (video.webkitEnterFullscreen) {
+                        video.webkitEnterFullscreen();
+                    }
+                });
+            }
+        }
+
         function setupVideoObserver() {
             if (!('IntersectionObserver' in window)) return;
             videoObserver = new IntersectionObserver((entries) => {
                 entries.forEach(entry => {
-                    const video = entry.target;
+                    const container = entry.target;
+                    const video = container.querySelector('video');
+                    if (!video) return;
+
                     if (entry.isIntersecting) {
                         if (!video.src && video.dataset.src) {
                             video.src = video.dataset.src;
@@ -1200,19 +1376,17 @@
         }
 
         function observeFeedVideos() {
-            const videos = document.querySelectorAll('video.lazy-video');
-            videos.forEach(video => {
-                if (!video.dataset.boundPlay) {
-                    video.dataset.boundPlay = '1';
-                    video.addEventListener('play', () => {
-                        document.querySelectorAll('video.lazy-video').forEach(other => {
-                            if (other !== video && !other.paused) other.pause();
-                        });
-                    });
+            const containers = document.querySelectorAll('.custom-video-container');
+            containers.forEach(container => {
+                const video = container.querySelector('video');
+                if (!container.dataset.initialized) {
+                    container.dataset.initialized = '1';
+                    const id = container.id.replace('player-container-', '');
+                    initCustomPlayer(container.id);
                 }
                 if (videoObserver) {
-                    videoObserver.observe(video);
-                } else if (!video.src && video.dataset.src) {
+                    videoObserver.observe(container);
+                } else if (video && !video.src && video.dataset.src) {
                     video.src = video.dataset.src;
                 }
             });
@@ -1302,7 +1476,7 @@
             document.getElementById('shorts-column').classList.toggle('hidden', filter === 'long');
             document.getElementById('long-column').classList.toggle('hidden', filter === 'short');
 
-            document.querySelectorAll('video.lazy-video').forEach(v => {
+            document.querySelectorAll('video.custom-player-video').forEach(v => {
                 if (!v.paused) v.pause();
             });
         }
@@ -1380,7 +1554,21 @@
 
             return `
                 <article class="short-card">
-                    <video class="lazy-video" data-src="${url}" controls playsinline preload="none" aria-label="${title}"></video>
+                    <div id="player-container-${id}" class="custom-video-container paused" oncontextmenu="return false;">
+                        <video class="custom-player-video" data-src="${url}" playsinline preload="none" controlsList="nodownload" disablePictureInPicture aria-label="${title}"></video>
+                        <div class="big-play-btn player-big-play"><i class="fa-solid fa-play"></i></div>
+                        <div class="video-overlay-controls">
+                            <input type="range" min="0" max="100" value="0" class="video-progress-bar">
+                            <div class="flex items-center justify-between text-xs text-zinc-300">
+                                <div class="flex items-center gap-3">
+                                    <button type="button" class="player-play-pause text-purple-300 hover:text-white w-7 h-7 flex items-center justify-center rounded-lg bg-zinc-800/80"><i class="fa-solid fa-play text-xs"></i></button>
+                                    <button type="button" class="player-mute text-zinc-300 hover:text-white w-7 h-7 flex items-center justify-center rounded-lg bg-zinc-800/80"><i class="fa-solid fa-volume-high text-xs"></i></button>
+                                    <span class="player-time text-[10px] font-mono text-zinc-400">0:00 / 0:00</span>
+                                </div>
+                                <button type="button" class="player-fullscreen text-zinc-300 hover:text-white w-7 h-7 flex items-center justify-center rounded-lg bg-zinc-800/80"><i class="fa-solid fa-expand text-xs"></i></button>
+                            </div>
+                        </div>
+                    </div>
                     <div class="short-gradient"></div>
                     <div class="short-meta">
                         <div class="flex items-center gap-2 text-xs text-zinc-200 mb-2 flex-wrap">
@@ -1440,7 +1628,21 @@
 
             return `
                 <article class="long-card">
-                    <video class="lazy-video" data-src="${url}" controls playsinline preload="none" aria-label="${title}"></video>
+                    <div id="player-container-${id}" class="custom-video-container is-long paused" oncontextmenu="return false;">
+                        <video class="custom-player-video" data-src="${url}" playsinline preload="none" controlsList="nodownload" disablePictureInPicture aria-label="${title}"></video>
+                        <div class="big-play-btn player-big-play"><i class="fa-solid fa-play"></i></div>
+                        <div class="video-overlay-controls">
+                            <input type="range" min="0" max="100" value="0" class="video-progress-bar">
+                            <div class="flex items-center justify-between text-xs text-zinc-300">
+                                <div class="flex items-center gap-3">
+                                    <button type="button" class="player-play-pause text-purple-300 hover:text-white w-7 h-7 flex items-center justify-center rounded-lg bg-zinc-800/80"><i class="fa-solid fa-play text-xs"></i></button>
+                                    <button type="button" class="player-mute text-zinc-300 hover:text-white w-7 h-7 flex items-center justify-center rounded-lg bg-zinc-800/80"><i class="fa-solid fa-volume-high text-xs"></i></button>
+                                    <span class="player-time text-[10px] font-mono text-zinc-400">0:00 / 0:00</span>
+                                </div>
+                                <button type="button" class="player-fullscreen text-zinc-300 hover:text-white w-7 h-7 flex items-center justify-center rounded-lg bg-zinc-800/80"><i class="fa-solid fa-expand text-xs"></i></button>
+                            </div>
+                        </div>
+                    </div>
                     <div class="p-4 sm:p-5">
                         <div class="flex items-center justify-between gap-3 text-xs text-zinc-500 mb-2">
                             <span class="px-2 py-1 rounded-full bg-purple-500/10 text-purple-300 font-bold">LONG VIDEO</span>
