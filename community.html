@@ -107,13 +107,13 @@
             z-index: 2;
             left: 16px;
             right: 72px;
-            bottom: 18px;
+            bottom: 26px; /* Raised slightly to give room for YouTube-style progress line */
         }
         .short-actions {
             position: absolute;
             z-index: 3;
             right: 12px;
-            bottom: 20px;
+            bottom: 26px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -200,7 +200,7 @@
             filter: drop-shadow(0 0 4px rgba(56, 189, 248, 0.4));
         }
 
-        /* CUSTOM THEMED VIDEO PLAYER CONTROLS */
+        /* YOUTUBE SHORTS & CUSTOM VIDEO PLAYER STYLING */
         .custom-video-container {
             position: relative;
             width: 100%;
@@ -218,12 +218,71 @@
             object-fit: contain;
             display: block;
         }
-        .video-overlay-controls {
+        
+        /* YouTube Shorts Style Bottom Progress Line */
+        .shorts-progress-bar {
+            appearance: none;
+            -webkit-appearance: none;
             position: absolute;
             bottom: 0;
             left: 0;
             right: 0;
-            background: linear-gradient(to top, rgba(9, 9, 11, 0.92), rgba(9, 9, 11, 0.5), transparent);
+            width: 100%;
+            height: 3px; /* Thin line by default */
+            background: rgba(255, 255, 255, 0.2);
+            outline: none;
+            cursor: pointer;
+            z-index: 10;
+            transition: height 0.15s ease;
+            margin: 0;
+        }
+        .shorts-progress-bar::-webkit-slider-thumb {
+            appearance: none;
+            -webkit-appearance: none;
+            width: 0px; /* Hidden thumb by default */
+            height: 0px;
+            border-radius: 50%;
+            background: #c084fc;
+            box-shadow: 0 0 8px #8b5cf6;
+            transition: width 0.15s, height 0.15s;
+        }
+        .custom-video-container:hover .shorts-progress-bar,
+        .shorts-progress-bar:active {
+            height: 6px; /* Thickens on hover */
+        }
+        .custom-video-container:hover .shorts-progress-bar::-webkit-slider-thumb,
+        .shorts-progress-bar:active::-webkit-slider-thumb {
+            width: 12px; /* Reveals thumb circle on hover */
+            height: 12px;
+        }
+
+        /* Shorts Control Bar (Appears on hover) */
+        .shorts-controls-overlay {
+            position: absolute;
+            bottom: 12px;
+            left: 16px;
+            right: 72px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 9;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease-in-out;
+        }
+        .custom-video-container:hover .shorts-controls-overlay,
+        .custom-video-container.paused .shorts-controls-overlay {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        /* Long Video Control Bar */
+        .long-video-controls {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to top, rgba(9, 9, 11, 0.95), rgba(9, 9, 11, 0.6), transparent);
             padding: 24px 14px 12px 14px;
             display: flex;
             flex-direction: column;
@@ -233,13 +292,12 @@
             z-index: 10;
             pointer-events: none;
         }
-        .custom-video-container:hover .video-overlay-controls,
-        .custom-video-container.paused .video-overlay-controls,
-        .custom-video-container.touch-active .video-overlay-controls {
+        .custom-video-container.is-long:hover .long-video-controls,
+        .custom-video-container.is-long.paused .long-video-controls {
             opacity: 1;
             pointer-events: auto;
         }
-        .video-progress-bar {
+        .long-progress-bar {
             appearance: none;
             -webkit-appearance: none;
             width: 100%;
@@ -248,10 +306,8 @@
             border-radius: 999px;
             outline: none;
             cursor: pointer;
-            transition: height 0.15s;
         }
-        .video-progress-bar:hover { height: 7px; }
-        .video-progress-bar::-webkit-slider-thumb {
+        .long-progress-bar::-webkit-slider-thumb {
             appearance: none;
             -webkit-appearance: none;
             width: 12px;
@@ -261,6 +317,7 @@
             box-shadow: 0 0 10px #8b5cf6;
             cursor: pointer;
         }
+
         .big-play-btn {
             position: absolute;
             inset: 0;
@@ -304,8 +361,9 @@
                 height: 68vh;
                 border-radius: 16px;
             }
-            .short-meta { left: 12px; right: 64px; bottom: 14px; }
-            .short-actions { right: 8px; bottom: 16px; }
+            .short-meta { left: 12px; right: 64px; bottom: 22px; }
+            .shorts-controls-overlay { left: 12px; right: 60px; bottom: 10px; }
+            .short-actions { right: 8px; bottom: 20px; }
         }
     </style>
 </head>
@@ -636,6 +694,7 @@
         const ADMIN_SECRET_PIN = "1234";
 
         const LIKED_STORAGE_KEY = "beacreator_liked_ids";
+        const VIEWED_STORAGE_KEY = "beacreator_viewed_ids";
         const ACTIVE_USER_KEY = "beacreator_active_username";
 
         let supabaseClient = null;
@@ -657,6 +716,7 @@
         let pendingLogoDataUrl = '';
         let videoObserver = null;
         const likingInProgress = new Set();
+        const viewingRecorded = new Set();
 
         window.addEventListener('DOMContentLoaded', async () => {
             setupVideoObserver();
@@ -1270,8 +1330,8 @@
             });
         }
 
-        // CUSTOM VIDEO PLAYER CONTROLS IMPLEMENTATION
-        function initCustomPlayer(containerId) {
+        // CUSTOM VIDEO PLAYER & VIEWS TRACKER
+        function initCustomPlayer(containerId, videoId) {
             const container = document.getElementById(containerId);
             if (!container) return;
             const video = container.querySelector('video');
@@ -1293,7 +1353,6 @@
 
             function togglePlay() {
                 if (video.paused) {
-                    // Pause all other custom videos
                     document.querySelectorAll('video.custom-player-video').forEach(v => {
                         if (v !== video && !v.paused) v.pause();
                     });
@@ -1310,13 +1369,16 @@
             video.addEventListener('play', () => {
                 container.classList.remove('paused');
                 if (bigPlayBtn) bigPlayBtn.style.opacity = '0';
-                if (playPauseBtn) playPauseBtn.innerHTML = '<i class="fa-solid fa-pause text-sm"></i>';
+                if (playPauseBtn) playPauseBtn.innerHTML = '<i class="fa-solid fa-pause text-xs"></i>';
+                
+                // Record view once per session
+                recordVideoView(videoId);
             });
 
             video.addEventListener('pause', () => {
                 container.classList.add('paused');
                 if (bigPlayBtn) bigPlayBtn.style.opacity = '1';
-                if (playPauseBtn) playPauseBtn.innerHTML = '<i class="fa-solid fa-play text-sm"></i>';
+                if (playPauseBtn) playPauseBtn.innerHTML = '<i class="fa-solid fa-play text-xs"></i>';
             });
 
             video.addEventListener('timeupdate', () => {
@@ -1339,8 +1401,8 @@
                 muteBtn.addEventListener('click', () => {
                     video.muted = !video.muted;
                     muteBtn.innerHTML = video.muted
-                        ? '<i class="fa-solid fa-volume-xmark text-sm"></i>'
-                        : '<i class="fa-solid fa-volume-high text-sm"></i>';
+                        ? '<i class="fa-solid fa-volume-xmark text-xs"></i>'
+                        : '<i class="fa-solid fa-volume-high text-xs"></i>';
                 });
             }
 
@@ -1353,6 +1415,33 @@
                     }
                 });
             }
+        }
+
+        async function recordVideoView(videoId) {
+            const numericId = Number(videoId);
+            if (!supabaseClient || !Number.isFinite(numericId) || viewingRecorded.has(numericId)) return;
+            viewingRecorded.add(numericId);
+
+            const cachedItem = allVideosCache.find(v => Number(v.id) === numericId);
+            const currentViews = cachedItem ? (Number(cachedItem.views) || 0) : 0;
+
+            document.querySelectorAll(`.view-count-${numericId}`).forEach(el => {
+                el.textContent = String(currentViews + 1);
+            });
+
+            try {
+                const { data, error } = await supabaseClient
+                    .from('videos')
+                    .update({ views: currentViews + 1 })
+                    .eq('id', numericId)
+                    .select('views')
+                    .single();
+
+                if (!error && data) {
+                    const updated = Number(data.views ?? (currentViews + 1));
+                    if (cachedItem) cachedItem.views = updated;
+                }
+            } catch (_) {}
         }
 
         function setupVideoObserver() {
@@ -1382,7 +1471,7 @@
                 if (!container.dataset.initialized) {
                     container.dataset.initialized = '1';
                     const id = container.id.replace('player-container-', '');
-                    initCustomPlayer(container.id);
+                    initCustomPlayer(container.id, id);
                 }
                 if (videoObserver) {
                     videoObserver.observe(container);
@@ -1444,7 +1533,7 @@
                 const { data: publicUrlData } = supabaseClient.storage.from('videos').getPublicUrl(fileName);
                 const videoUrl = publicUrlData.publicUrl;
                 const { error: dbError } = await supabaseClient.from('videos').insert([
-                    { title, description: desc, video_url: videoUrl, format: type, author, likes: 0 }
+                    { title, description: desc, video_url: videoUrl, format: type, author, likes: 0, views: 0 }
                 ]);
                 if (dbError) throw new Error('Database Error: ' + dbError.message);
 
@@ -1544,6 +1633,7 @@
             const description = escapeHtml(video.description || 'No description added.');
             const url = safeVideoUrl(video.video_url);
             const likes = Math.max(0, Number(video.likes) || 0);
+            const views = Math.max(0, Number(video.views) || 0);
             const commentCount = getCommentCount(id);
             const isLiked = hasUserLiked(id);
             const date = video.created_at
@@ -1557,18 +1647,19 @@
                     <div id="player-container-${id}" class="custom-video-container paused" oncontextmenu="return false;">
                         <video class="custom-player-video" data-src="${url}" playsinline preload="none" controlsList="nodownload" disablePictureInPicture aria-label="${title}"></video>
                         <div class="big-play-btn player-big-play"><i class="fa-solid fa-play"></i></div>
-                        <div class="video-overlay-controls">
-                            <input type="range" min="0" max="100" value="0" class="video-progress-bar">
-                            <div class="flex items-center justify-between text-xs text-zinc-300">
-                                <div class="flex items-center gap-3">
-                                    <button type="button" class="player-play-pause text-purple-300 hover:text-white w-7 h-7 flex items-center justify-center rounded-lg bg-zinc-800/80"><i class="fa-solid fa-play text-xs"></i></button>
-                                    <button type="button" class="player-mute text-zinc-300 hover:text-white w-7 h-7 flex items-center justify-center rounded-lg bg-zinc-800/80"><i class="fa-solid fa-volume-high text-xs"></i></button>
-                                    <span class="player-time text-[10px] font-mono text-zinc-400">0:00 / 0:00</span>
-                                </div>
-                                <button type="button" class="player-fullscreen text-zinc-300 hover:text-white w-7 h-7 flex items-center justify-center rounded-lg bg-zinc-800/80"><i class="fa-solid fa-expand text-xs"></i></button>
+                        
+                        <!-- YouTube Shorts Style Controls & Timeline at Bottom -->
+                        <div class="shorts-controls-overlay">
+                            <div class="flex items-center gap-2">
+                                <button type="button" class="player-play-pause text-purple-300 hover:text-white w-7 h-7 flex items-center justify-center rounded-lg bg-zinc-900/80"><i class="fa-solid fa-play text-xs"></i></button>
+                                <button type="button" class="player-mute text-zinc-300 hover:text-white w-7 h-7 flex items-center justify-center rounded-lg bg-zinc-900/80"><i class="fa-solid fa-volume-high text-xs"></i></button>
+                                <span class="player-time text-[10px] font-mono text-zinc-300">0:00</span>
                             </div>
+                            <button type="button" class="player-fullscreen text-zinc-300 hover:text-white w-7 h-7 flex items-center justify-center rounded-lg bg-zinc-900/80" title="Fullscreen"><i class="fa-solid fa-expand text-xs"></i></button>
                         </div>
+                        <input type="range" min="0" max="100" value="0" class="shorts-progress-bar video-progress-bar">
                     </div>
+
                     <div class="short-gradient"></div>
                     <div class="short-meta">
                         <div class="flex items-center gap-2 text-xs text-zinc-200 mb-2 flex-wrap">
@@ -1578,7 +1669,7 @@
                                     <span>@${author}</span>${renderVerifiedBadge(rawAuthor)}
                                 </span>
                             </button>
-                            <span class="text-zinc-400">· ${escapeHtml(date)}</span>
+                            <span class="text-zinc-400">· <i class="fa-solid fa-eye mr-0.5"></i><span class="view-count-${id}">${views}</span> views</span>
                         </div>
                         <button type="button" class="video-title-button text-base" aria-expanded="false" onclick="toggleDescription(${id})">
                             ${title} <i class="fa-solid fa-chevron-down text-xs ml-1"></i>
@@ -1614,6 +1705,7 @@
             const description = escapeHtml(video.description || 'No description added.');
             const url = safeVideoUrl(video.video_url);
             const likes = Math.max(0, Number(video.likes) || 0);
+            const views = Math.max(0, Number(video.views) || 0);
             const commentCount = getCommentCount(id);
             const isLiked = hasUserLiked(id);
             const date = video.created_at
@@ -1631,8 +1723,8 @@
                     <div id="player-container-${id}" class="custom-video-container is-long paused" oncontextmenu="return false;">
                         <video class="custom-player-video" data-src="${url}" playsinline preload="none" controlsList="nodownload" disablePictureInPicture aria-label="${title}"></video>
                         <div class="big-play-btn player-big-play"><i class="fa-solid fa-play"></i></div>
-                        <div class="video-overlay-controls">
-                            <input type="range" min="0" max="100" value="0" class="video-progress-bar">
+                        <div class="long-video-controls">
+                            <input type="range" min="0" max="100" value="0" class="long-progress-bar video-progress-bar">
                             <div class="flex items-center justify-between text-xs text-zinc-300">
                                 <div class="flex items-center gap-3">
                                     <button type="button" class="player-play-pause text-purple-300 hover:text-white w-7 h-7 flex items-center justify-center rounded-lg bg-zinc-800/80"><i class="fa-solid fa-play text-xs"></i></button>
@@ -1646,7 +1738,10 @@
                     <div class="p-4 sm:p-5">
                         <div class="flex items-center justify-between gap-3 text-xs text-zinc-500 mb-2">
                             <span class="px-2 py-1 rounded-full bg-purple-500/10 text-purple-300 font-bold">LONG VIDEO</span>
-                            <span>${escapeHtml(date)}</span>
+                            <div class="flex items-center gap-3">
+                                <span><i class="fa-solid fa-eye mr-1"></i><strong class="view-count-${id} text-zinc-300">${views}</strong> views</span>
+                                <span>${escapeHtml(date)}</span>
+                            </div>
                         </div>
                         <button type="button" class="video-title-button text-base sm:text-lg" aria-expanded="false" onclick="toggleDescription(${id})">
                             ${title} <i class="fa-solid fa-chevron-down text-xs ml-1"></i>
