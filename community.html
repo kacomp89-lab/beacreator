@@ -207,6 +207,13 @@
             filter: drop-shadow(0 0 4px rgba(56, 189, 248, 0.4));
         }
 
+        .hashtag-tag {
+            color: #c084fc;
+            cursor: pointer;
+            font-weight: 700;
+        }
+        .hashtag-tag:hover { text-decoration: underline; }
+
         /* CUSTOM VIDEO PLAYER & CONTROLS */
         .custom-video-container {
             position: relative;
@@ -389,20 +396,24 @@
         <div class="flex-1 max-w-md hidden md:block">
             <div class="relative">
                 <i class="fa-solid fa-search absolute left-3.5 top-3 text-zinc-400 text-xs"></i>
-                <input type="text" id="global-search-input" oninput="handleSearchInput(event)" placeholder="Search videos or @channels..." class="w-full bg-zinc-900 border border-zinc-800 rounded-2xl pl-10 pr-4 py-2 text-xs text-white focus:outline-none focus:border-purple-500 transition-colors">
+                <input type="text" id="global-search-input" oninput="handleSearchInput(event)" placeholder="Search videos, #hashtags or @channels..." class="w-full bg-zinc-900 border border-zinc-800 rounded-2xl pl-10 pr-4 py-2 text-xs text-white focus:outline-none focus:border-purple-500 transition-colors">
             </div>
         </div>
 
         <nav class="hidden md:flex items-center space-x-1 bg-zinc-900 p-1.5 rounded-2xl border border-zinc-800">
-            <button onclick="window.location.href='index.html'" class="px-4 py-2 rounded-xl text-xs font-semibold text-zinc-400 hover:text-white transition-colors flex items-center space-x-2">
+            <button onclick="window.location.href='index.html'" class="px-3 py-2 rounded-xl text-xs font-semibold text-zinc-400 hover:text-white transition-colors flex items-center space-x-1.5">
                 <i class="fa-solid fa-house"></i>
                 <span>Studio</span>
             </button>
-            <button id="nav-feed-btn" onclick="showMainFeed()" class="px-4 py-2 rounded-xl text-xs font-semibold bg-purple-600 text-white flex items-center space-x-2">
+            <button id="nav-feed-btn" onclick="showMainFeed()" class="px-3 py-2 rounded-xl text-xs font-semibold bg-purple-600 text-white flex items-center space-x-1.5">
                 <i class="fa-solid fa-users"></i>
-                <span>Community Feed</span>
+                <span>Feed</span>
             </button>
-            <button id="nav-my-channel-btn" onclick="openMyChannelOrSetup()" class="px-4 py-2 rounded-xl text-xs font-semibold text-zinc-400 hover:text-white transition-colors flex items-center space-x-2">
+            <button onclick="openLeaderboardModal()" class="px-3 py-2 rounded-xl text-xs font-semibold text-zinc-400 hover:text-white transition-colors flex items-center space-x-1.5">
+                <i class="fa-solid fa-trophy text-amber-400"></i>
+                <span>Leaderboard</span>
+            </button>
+            <button id="nav-my-channel-btn" onclick="openMyChannelOrSetup()" class="px-3 py-2 rounded-xl text-xs font-semibold text-zinc-400 hover:text-white transition-colors flex items-center space-x-1.5">
                 <i class="fa-solid fa-tv"></i>
                 <span>My Channel</span>
             </button>
@@ -426,7 +437,7 @@
     <div class="md:hidden px-4 pt-3">
         <div class="relative">
             <i class="fa-solid fa-search absolute left-3.5 top-3 text-zinc-400 text-xs"></i>
-            <input type="text" id="mobile-search-input" oninput="handleSearchInput(event)" placeholder="Search videos or @channels..." class="w-full bg-zinc-900 border border-zinc-800 rounded-2xl pl-10 pr-4 py-2 text-xs text-white focus:outline-none focus:border-purple-500">
+            <input type="text" id="mobile-search-input" oninput="handleSearchInput(event)" placeholder="Search videos, #hashtags or @channels..." class="w-full bg-zinc-900 border border-zinc-800 rounded-2xl pl-10 pr-4 py-2 text-xs text-white focus:outline-none focus:border-purple-500">
         </div>
     </div>
 
@@ -439,14 +450,20 @@
                     <span>Creator Showcase & Channels</span>
                 </div>
                 <h1 class="text-2xl lg:text-4xl font-extrabold text-white">Explore Creator Shorts & Channels</h1>
-                <p class="text-zinc-400 text-xs lg:text-sm">Click any creator's @username to visit their channel, drop comments on videos, and follow top creators.</p>
+                <p class="text-zinc-400 text-xs lg:text-sm">Click any creator's @username to visit their channel, send DMs, and follow top creators.</p>
             </div>
             <div class="flex flex-wrap gap-2">
-                <button onclick="openProfileModal()" class="px-4 py-2.5 rounded-xl bg-zinc-900/90 hover:bg-zinc-800 border border-purple-500/40 text-purple-200 text-xs font-bold flex items-center gap-2">
-                    <i class="fa-solid fa-id-badge text-purple-400"></i>
-                    <span>Customize Channel & Bio</span>
+                <button onclick="openLeaderboardModal()" class="px-4 py-2.5 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/40 text-amber-300 text-xs font-bold flex items-center gap-2">
+                    <i class="fa-solid fa-trophy text-amber-400"></i>
+                    <span>Creator Leaderboard</span>
                 </button>
             </div>
+        </div>
+
+        <!-- TRENDING HASHTAGS BAR -->
+        <div id="trending-hashtags-bar" class="flex items-center gap-2 overflow-x-auto pb-1 text-xs">
+            <span class="text-zinc-400 font-bold shrink-0"><i class="fa-solid fa-fire text-amber-400 mr-1"></i> Trending:</span>
+            <div id="hashtag-chips-container" class="flex items-center gap-2 shrink-0"></div>
         </div>
 
         <!-- FILTER & SORT BAR -->
@@ -493,6 +510,10 @@
                 <span>Back to Global Feed</span>
             </button>
             <div class="flex items-center gap-2">
+                <button id="channel-dm-btn" onclick="openDirectMessageModalFromChannel()" class="px-3.5 py-2 rounded-xl bg-purple-600/25 hover:bg-purple-600/40 border border-purple-500/50 text-purple-200 text-xs font-bold flex items-center gap-1.5">
+                    <i class="fa-solid fa-paper-plane"></i>
+                    <span>Send Message (DM)</span>
+                </button>
                 <button id="channel-admin-verify-btn" onclick="toggleCreatorVerifiedAdmin()" class="px-3.5 py-2 rounded-xl bg-sky-950/70 hover:bg-sky-900/80 border border-sky-500/40 text-sky-300 text-xs font-bold flex items-center gap-1.5" title="Owner Only: Grant or Remove Verified Badge">
                     <i class="fa-solid fa-shield-halved"></i>
                     <span id="channel-admin-verify-text">Grant Verified</span>
@@ -605,21 +626,21 @@
             <i class="fa-solid fa-users text-base"></i>
             <span>Feed</span>
         </button>
-        <button onclick="openMyChannelOrSetup()" class="flex flex-col items-center gap-1 text-zinc-400 hover:text-white text-[10px] font-bold">
-            <i class="fa-solid fa-tv text-base"></i>
-            <span>My Channel</span>
+        <button onclick="openLeaderboardModal()" class="flex flex-col items-center gap-1 text-zinc-400 hover:text-white text-[10px] font-bold">
+            <i class="fa-solid fa-trophy text-base text-amber-400"></i>
+            <span>Leaderboard</span>
         </button>
         <button onclick="openUploadModal()" class="flex flex-col items-center gap-1 text-zinc-400 hover:text-white text-[10px] font-bold">
             <i class="fa-solid fa-circle-plus text-base text-purple-400"></i>
             <span>Upload</span>
         </button>
-        <button onclick="openProfileModal()" class="flex flex-col items-center gap-1 text-zinc-400 hover:text-white text-[10px] font-bold">
-            <i class="fa-solid fa-id-card text-base"></i>
-            <span>Profile</span>
+        <button onclick="openMyChannelOrSetup()" class="flex flex-col items-center gap-1 text-zinc-400 hover:text-white text-[10px] font-bold">
+            <i class="fa-solid fa-tv text-base"></i>
+            <span>My Channel</span>
         </button>
     </nav>
 
-    <!-- MODAL 1: COMMENTS DRAWER (WITH LIKES & REPLIES) -->
+    <!-- MODAL 1: COMMENTS DRAWER -->
     <div id="comments-modal" class="fixed inset-0 z-50 bg-black/80 flex items-end sm:items-center justify-center p-0 sm:p-4 hidden">
         <div class="glass-panel w-full max-w-lg rounded-t-3xl sm:rounded-3xl border border-purple-500/30 neon-glow flex flex-col max-h-[85vh] overflow-hidden">
             <div class="px-5 py-4 border-b border-zinc-800 flex items-center justify-between">
@@ -654,7 +675,50 @@
         </div>
     </div>
 
-    <!-- MODAL 2: CREATE / EDIT CHANNEL PROFILE -->
+    <!-- MODAL 2: CREATOR LEADERBOARD -->
+    <div id="leaderboard-modal" class="fixed inset-0 z-50 bg-black/85 flex items-center justify-center p-4 hidden">
+        <div class="glass-panel w-full max-w-lg p-6 rounded-3xl border border-amber-500/30 neon-glow space-y-4 relative">
+            <div class="flex items-center justify-between border-b border-zinc-800 pb-3">
+                <h3 class="text-base font-extrabold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-trophy text-amber-400"></i>
+                    <span>Top Creators Leaderboard</span>
+                </h3>
+                <button onclick="closeLeaderboardModal()" class="text-zinc-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <div id="leaderboard-list" class="space-y-2.5 max-h-[60vh] overflow-y-auto pr-1"></div>
+        </div>
+    </div>
+
+    <!-- MODAL 3: DIRECT MESSAGES (DMs) -->
+    <div id="dm-modal" class="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4 hidden">
+        <div class="glass-panel w-full max-w-md rounded-3xl border border-purple-500/30 neon-glow flex flex-col h-[520px] overflow-hidden">
+            <div class="px-5 py-4 border-b border-zinc-800 flex items-center justify-between">
+                <div class="flex items-center gap-2.5">
+                    <div id="dm-header-avatar"></div>
+                    <div>
+                        <h3 id="dm-header-title" class="text-sm font-extrabold text-white">Direct Message</h3>
+                        <span class="text-[10px] text-purple-400">Secure Creator Chat</span>
+                    </div>
+                </div>
+                <button onclick="closeDirectMessageModal()" class="w-8 h-8 rounded-full bg-zinc-800 hover:bg-zinc-700 text-zinc-300 flex items-center justify-center">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <div id="dm-messages-list" class="flex-1 overflow-y-auto p-4 space-y-3">
+                <div class="empty-state">Loading messages...</div>
+            </div>
+
+            <form onsubmit="handleSendDirectMessage(event)" class="p-3 border-t border-zinc-800 bg-zinc-950/90 flex items-center gap-2">
+                <input type="text" id="dm-input" required maxlength="400" placeholder="Type a message..." class="flex-1 bg-zinc-900 border border-zinc-800 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-purple-500">
+                <button type="submit" id="dm-submit-btn" class="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs shrink-0 transition-colors">
+                    Send
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL 4: CREATE / EDIT CHANNEL PROFILE -->
     <div id="profile-modal" class="fixed inset-0 z-50 bg-black/85 flex items-center justify-center p-4 hidden overflow-y-auto">
         <div class="glass-panel w-full max-w-lg p-6 rounded-3xl border border-purple-500/30 neon-glow space-y-4 relative my-8">
             <div class="flex items-center justify-between">
@@ -671,7 +735,6 @@
                     <div class="flex-1 space-y-1">
                         <label class="text-xs font-bold text-zinc-200 block">Channel Logo Image</label>
                         <input type="file" id="profile-logo-input" accept="image/*" onchange="previewChannelLogo(event)" class="w-full text-xs text-zinc-400 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-purple-600 file:text-white file:font-semibold">
-                        <p class="text-[11px] text-zinc-500">Auto-compressed to a crisp circular avatar.</p>
                     </div>
                 </div>
 
@@ -684,31 +747,23 @@
                 </div>
 
                 <div class="space-y-1.5">
-                    <label class="text-xs font-semibold text-zinc-300">Short Bio (Shown under channel header)</label>
+                    <label class="text-xs font-semibold text-zinc-300">Short Bio</label>
                     <input type="text" id="profile-bio" maxlength="120" placeholder="e.g., Daily Tech Shorts & Filmmaking Breakdowns" class="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-purple-500">
                 </div>
 
                 <div class="space-y-1.5">
-                    <label class="text-xs font-semibold text-zinc-300">About Yourself (Full Channel Story & Goals)</label>
-                    <textarea id="profile-about" rows="3" maxlength="800" placeholder="Tell viewers about yourself, your editing software, upload schedule..." class="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-purple-500 resize-none"></textarea>
+                    <label class="text-xs font-semibold text-zinc-300">About Yourself</label>
+                    <textarea id="profile-about" rows="3" maxlength="800" placeholder="Tell viewers about yourself..." class="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-purple-500 resize-none"></textarea>
                 </div>
 
                 <div class="grid grid-cols-2 gap-3">
                     <div class="space-y-1">
-                        <label class="text-[11px] font-semibold text-zinc-400">Instagram Handle / URL</label>
-                        <input type="text" id="profile-instagram" placeholder="username or link" class="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-purple-500">
+                        <label class="text-[11px] font-semibold text-zinc-400">Instagram</label>
+                        <input type="text" id="profile-instagram" placeholder="username" class="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-purple-500">
                     </div>
                     <div class="space-y-1">
-                        <label class="text-[11px] font-semibold text-zinc-400">X (Twitter) Handle</label>
-                        <input type="text" id="profile-twitter" placeholder="username or link" class="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-purple-500">
-                    </div>
-                    <div class="space-y-1">
-                        <label class="text-[11px] font-semibold text-zinc-400">YouTube Channel Link</label>
-                        <input type="text" id="profile-youtube" placeholder="channel link" class="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-purple-500">
-                    </div>
-                    <div class="space-y-1">
-                        <label class="text-[11px] font-semibold text-zinc-400">Portfolio Website</label>
-                        <input type="text" id="profile-website" placeholder="https://..." class="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-purple-500">
+                        <label class="text-[11px] font-semibold text-zinc-400">X (Twitter)</label>
+                        <input type="text" id="profile-twitter" placeholder="username" class="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-purple-500">
                     </div>
                 </div>
 
@@ -724,7 +779,7 @@
         </div>
     </div>
 
-    <!-- MODAL 3: UPLOAD VIDEO -->
+    <!-- MODAL 5: UPLOAD VIDEO -->
     <div id="upload-modal" class="fixed inset-0 z-50 bg-black/85 flex items-center justify-center p-4 hidden">
         <div class="glass-panel w-full max-w-lg p-6 rounded-3xl border border-purple-500/30 neon-glow space-y-4 relative">
             <div class="flex items-center justify-between">
@@ -734,8 +789,8 @@
 
             <form onsubmit="handleGlobalUpload(event)" class="space-y-4">
                 <div class="space-y-1.5">
-                    <label class="text-xs font-semibold text-zinc-300">Video Title</label>
-                    <input type="text" id="vid-title" required placeholder="e.g., How I Gained 10k Subs in 30 Days" class="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-purple-500">
+                    <label class="text-xs font-semibold text-zinc-300">Video Title (Include #hashtags)</label>
+                    <input type="text" id="vid-title" required placeholder="e.g., Ultimate AI Tutorial #tech #ai" class="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-purple-500">
                 </div>
                 <div class="grid grid-cols-2 gap-4">
                     <div class="space-y-1.5">
@@ -751,8 +806,8 @@
                     </div>
                 </div>
                 <div class="space-y-1.5">
-                    <label class="text-xs font-semibold text-zinc-300">Description / Hook Strategy</label>
-                    <textarea id="vid-desc" rows="3" required placeholder="Explain your hook or what viewers will learn..." class="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-purple-500 resize-none"></textarea>
+                    <label class="text-xs font-semibold text-zinc-300">Description / Hashtags</label>
+                    <textarea id="vid-desc" rows="3" required placeholder="Explain your video and add hashtags like #vlog #gaming..." class="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-purple-500 resize-none"></textarea>
                 </div>
                 <button type="submit" id="upload-submit-btn" class="w-full py-3 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-sm transition-colors flex items-center justify-center space-x-2">
                     <span>Publish Globally</span>
@@ -766,11 +821,7 @@
         const SUPABASE_URL = "https://kdanylytvxsktgosvgjw.supabase.co";
         const SUPABASE_ANON_KEY = "sb_publishable_bhk8btpWpfdFtgxnkV05-w_rbkKl3Ye";
 
-        const OWNER_VERIFIED_USERS = [
-            "beacreator",
-            "kcazfilm"
-        ];
-
+        const OWNER_VERIFIED_USERS = ["beacreator", "kcazfilm"];
         const ADMIN_SECRET_PIN = "1234";
 
         const LIKED_STORAGE_KEY = "beacreator_liked_ids";
@@ -796,9 +847,11 @@
         let commentsByVideoId = {};
         let activeChannelUsername = null;
         let activeCommentVideoId = null;
+        let activeDmRecipient = null;
         let replyingToCommentId = null;
         let pendingLogoDataUrl = '';
         let videoObserver = null;
+        let dmSubscription = null;
         const likingInProgress = new Set();
         const viewingRecorded = new Set();
 
@@ -809,6 +862,7 @@
                 loadGlobalVideos(true)
             ]);
             updateHeaderProfileUI();
+            renderTrendingHashtags();
         });
 
         function cleanUsername(input) {
@@ -834,8 +888,6 @@
                 logo_url: '',
                 instagram: '',
                 twitter: '',
-                youtube: '',
-                website: '',
                 is_verified: isCreatorVerified(uname)
             };
         }
@@ -898,8 +950,6 @@
                 logo_url: '',
                 instagram: '',
                 twitter: '',
-                youtube: '',
-                website: '',
                 is_verified: isCreatorVerified(username)
             };
         }
@@ -938,6 +988,261 @@
             }
         }
 
+        // HASHTAGS EXTRACTION & RENDERING
+        function extractHashtags(text) {
+            const matches = String(text || '').match(/#[\w]+/g);
+            return matches ? matches.map(tag => tag.toLowerCase()) : [];
+        }
+
+        function renderTrendingHashtags() {
+            const container = document.getElementById('hashtag-chips-container');
+            const tagCounts = {};
+            allVideosCache.forEach(v => {
+                const tags = extractHashtags((v.title || '') + ' ' + (v.description || ''));
+                tags.forEach(t => {
+                    tagCounts[t] = (tagCounts[t] || 0) + 1;
+                });
+            });
+
+            const sortedTags = Object.keys(tagCounts).sort((a, b) => tagCounts[b] - tagCounts[a]).slice(0, 6);
+            if (!sortedTags.length) {
+                container.innerHTML = '<span class="text-zinc-500">No hashtags yet. Add #tags to your uploads!</span>';
+                return;
+            }
+
+            container.innerHTML = sortedTags.map(tag => `
+                <button type="button" onclick="searchByHashtag('${escapeJsString(tag)}')" class="px-3 py-1 rounded-full bg-purple-950/60 border border-purple-800/60 text-purple-300 font-bold hover:bg-purple-900 transition-colors">
+                    ${escapeHtml(tag)}
+                </button>
+            `).join('');
+        }
+
+        function searchByHashtag(tag) {
+            searchQuery = tag;
+            const desktopInput = document.getElementById('global-search-input');
+            const mobileInput = document.getElementById('mobile-search-input');
+            if (desktopInput) desktopInput.value = tag;
+            if (mobileInput) mobileInput.value = tag;
+            renderFeedsFromCache();
+        }
+
+        function formatTextWithHashtags(text) {
+            const safe = escapeHtml(text);
+            return safe.replace(/#[\w]+/g, match => `<span class="hashtag-tag" onclick="event.stopPropagation(); searchByHashtag('${match}')">${match}</span>`);
+        }
+
+        // CREATOR LEADERBOARD MODAL
+        function openLeaderboardModal() {
+            const modal = document.getElementById('leaderboard-modal');
+            const listEl = document.getElementById('leaderboard-list');
+            modal.classList.remove('hidden');
+
+            // Aggregate creator stats
+            const creatorStats = {};
+            allVideosCache.forEach(v => {
+                const author = v.author || 'Creator';
+                if (!creatorStats[author]) {
+                    creatorStats[author] = { username: author, videos: 0, likes: 0, views: 0 };
+                }
+                creatorStats[author].videos += 1;
+                creatorStats[author].likes += Number(v.likes) || 0;
+                creatorStats[author].views += Number(v.views) || 0;
+            });
+
+            // Also include all profile creators
+            Object.values(profilesMap).forEach(p => {
+                if (p.username && !creatorStats[p.username]) {
+                    creatorStats[p.username] = { username: p.username, videos: 0, likes: 0, views: 0 };
+                }
+            });
+
+            const sortedCreators = Object.values(creatorStats).sort((a, b) => b.likes - a.likes || b.views - a.views);
+
+            if (!sortedCreators.length) {
+                listEl.innerHTML = '<div class="empty-state">No creators on the leaderboard yet.</div>';
+                return;
+            }
+
+            listEl.innerHTML = sortedCreators.map((c, index) => {
+                const rankMedal = index === 0 ? '👑' : index === 1 ? '🥈' : index === 2 ? '🥉' : `#${index + 1}`;
+                const safeName = escapeHtml(c.username);
+                const jsName = escapeJsString(c.username);
+                return `
+                    <div onclick="closeLeaderboardModal(); openCreatorChannel('${jsName}')" class="p-3.5 rounded-2xl bg-zinc-900/90 hover:bg-zinc-800 border border-zinc-800 hover:border-amber-500/50 cursor-pointer flex items-center justify-between gap-3 transition-colors">
+                        <div class="flex items-center gap-3 min-w-0">
+                            <span class="text-sm font-extrabold w-6 text-center text-amber-400">${rankMedal}</span>
+                            ${renderAvatarHtml(c.username, 'w-10 h-10', 'text-sm')}
+                            <div class="min-w-0">
+                                <div class="text-sm font-extrabold text-white truncate flex items-center">
+                                    <span>@${safeName}</span>${renderVerifiedBadge(c.username)}
+                                </div>
+                                <div class="text-[11px] text-zinc-400">${c.videos} Videos · ${c.views} Views</div>
+                            </div>
+                        </div>
+                        <div class="text-xs font-extrabold text-pink-400 shrink-0 bg-pink-500/10 px-2.5 py-1 rounded-full border border-pink-500/30">
+                            <i class="fa-solid fa-heart mr-1"></i> ${c.likes} Likes
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function closeLeaderboardModal() {
+            document.getElementById('leaderboard-modal').classList.add('hidden');
+        }
+
+        // DIRECT MESSAGING (DMs)
+        function openDirectMessageModalFromChannel() {
+            if (!activeChannelUsername) return;
+            openDirectMessageModal(activeChannelUsername);
+        }
+
+        async function openDirectMessageModal(recipientUsername) {
+            const myProfile = getMyProfile();
+            if (!myProfile || !myProfile.username) {
+                alert('Please create your channel username first to send direct messages!');
+                openProfileModal();
+                return;
+            }
+            if (myProfile.username.toLowerCase() === recipientUsername.toLowerCase()) {
+                alert('You cannot send a direct message to yourself.');
+                return;
+            }
+
+            activeDmRecipient = recipientUsername;
+            document.getElementById('dm-header-title').innerHTML = `Chat with @${escapeHtml(recipientUsername)}${renderVerifiedBadge(recipientUsername)}`;
+            document.getElementById('dm-header-avatar').innerHTML = renderAvatarHtml(recipientUsername, 'w-8 h-8', 'text-xs');
+            document.getElementById('dm-modal').classList.remove('hidden');
+
+            await fetchAndRenderDms();
+
+            // Real-time Supabase subscription for instant live messaging
+            if (supabaseClient && !dmSubscription) {
+                dmSubscription = supabaseClient
+                    .channel('public:messages')
+                    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, payload => {
+                        const newMsg = payload.new;
+                        const myU = getActiveUsername().toLowerCase();
+                        const rU = activeDmRecipient.toLowerCase();
+                        const sU = String(newMsg.sender_username || '').toLowerCase();
+                        const recU = String(newMsg.recipient_username || '').toLowerCase();
+
+                        if ((sU === myU && recU === rU) || (sU === rU && recU === myU)) {
+                            appendDmMessageUI(newMsg);
+                        }
+                    })
+                    .subscribe();
+            }
+        }
+
+        function closeDirectMessageModal() {
+            activeDmRecipient = null;
+            document.getElementById('dm-modal').classList.add('hidden');
+            if (dmSubscription && supabaseClient) {
+                supabaseClient.removeChannel(dmSubscription);
+                dmSubscription = null;
+            }
+        }
+
+        async function fetchAndRenderDms() {
+            const listEl = document.getElementById('dm-messages-list');
+            const myU = getActiveUsername();
+            const rU = activeDmRecipient;
+
+            if (!supabaseClient) {
+                listEl.innerHTML = '<div class="empty-state">Supabase is not connected.</div>';
+                return;
+            }
+
+            try {
+                const { data, error } = await supabaseClient
+                    .from('messages')
+                    .select('*')
+                    .or(`and(sender_username.eq.${myU},recipient_username.eq.${rU}),and(sender_username.eq.${rU},recipient_username.eq.${myU})`)
+                    .order('created_at', { ascending: true });
+
+                if (error) throw error;
+
+                if (!Array.isArray(data) || !data.length) {
+                    listEl.innerHTML = '<div class="empty-state py-12">No messages yet. Send a greeting to start chatting!</div>';
+                    return;
+                }
+
+                listEl.innerHTML = data.map(m => renderDmBubble(m)).join('');
+                listEl.scrollTop = listEl.scrollHeight;
+            } catch (err) {
+                listEl.innerHTML = '<div class="empty-state text-red-300">Could not load messages. Make sure messages table exists in Supabase.</div>';
+            }
+        }
+
+        function renderDmBubble(m) {
+            const myU = getActiveUsername();
+            const isMe = String(m.sender_username || '').toLowerCase() === myU.toLowerCase();
+            const text = escapeHtml(m.message || '');
+            const time = m.created_at ? new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
+
+            if (isMe) {
+                return `
+                    <div class="flex flex-col items-end">
+                        <div class="max-w-[80%] rounded-2xl rounded-tr-none bg-purple-600 px-3.5 py-2 text-xs text-white shadow-md break-words leading-relaxed">
+                            ${text}
+                        </div>
+                        <span class="text-[9px] text-zinc-500 mt-0.5 mr-1">${time}</span>
+                    </div>
+                `;
+            } else {
+                return `
+                    <div class="flex flex-col items-start">
+                        <div class="max-w-[80%] rounded-2xl rounded-tl-none bg-zinc-900 border border-zinc-800 px-3.5 py-2 text-xs text-zinc-200 shadow-md break-words leading-relaxed">
+                            ${text}
+                        </div>
+                        <span class="text-[9px] text-zinc-500 mt-0.5 ml-1">${time}</span>
+                    </div>
+                `;
+            }
+        }
+
+        function appendDmMessageUI(m) {
+            const listEl = document.getElementById('dm-messages-list');
+            if (listEl.querySelector('.empty-state')) {
+                listEl.innerHTML = '';
+            }
+            listEl.insertAdjacentHTML('beforeend', renderDmBubble(m));
+            listEl.scrollTop = listEl.scrollHeight;
+        }
+
+        async function handleSendDirectMessage(event) {
+            event.preventDefault();
+            const myU = getActiveUsername();
+            const rU = activeDmRecipient;
+            const input = document.getElementById('dm-input');
+            const text = input.value.trim();
+            if (!text || !myU || !rU || !supabaseClient) return;
+
+            input.value = '';
+
+            const newMsg = {
+                sender_username: myU,
+                recipient_username: rU,
+                message: text,
+                created_at: new Date().toISOString()
+            };
+
+            // Optimistic UI append
+            appendDmMessageUI(newMsg);
+
+            try {
+                await supabaseClient.from('messages').insert([{
+                    sender_username: myU,
+                    recipient_username: rU,
+                    message: text
+                }]);
+            } catch (err) {
+                alert('Could not send message: ' + (err.message || 'Check messages table configuration.'));
+            }
+        }
+
+        // PROFILE & CHANNEL SETUP
         function openProfileModal() {
             const modal = document.getElementById('profile-modal');
             const myProfile = getMyProfile();
@@ -946,8 +1251,6 @@
             const aboutInput = document.getElementById('profile-about');
             const igInput = document.getElementById('profile-instagram');
             const twInput = document.getElementById('profile-twitter');
-            const ytInput = document.getElementById('profile-youtube');
-            const webInput = document.getElementById('profile-website');
             const previewImg = document.getElementById('profile-logo-preview');
             const placeholder = document.getElementById('profile-logo-placeholder');
 
@@ -957,8 +1260,6 @@
                 aboutInput.value = myProfile.about || '';
                 igInput.value = myProfile.instagram || '';
                 twInput.value = myProfile.twitter || '';
-                ytInput.value = myProfile.youtube || '';
-                webInput.value = myProfile.website || '';
                 pendingLogoDataUrl = myProfile.logo_url || '';
             } else {
                 pendingLogoDataUrl = '';
@@ -1018,12 +1319,10 @@
             const about = document.getElementById('profile-about').value.trim();
             const instagram = document.getElementById('profile-instagram').value.trim();
             const twitter = document.getElementById('profile-twitter').value.trim();
-            const youtube = document.getElementById('profile-youtube').value.trim();
-            const website = document.getElementById('profile-website').value.trim();
             const btn = document.getElementById('save-profile-btn');
 
             if (!username) {
-                alert('Please enter a valid username (letters, numbers, underscores).');
+                alert('Please enter a valid username.');
                 return;
             }
 
@@ -1038,8 +1337,6 @@
                 logo_url: pendingLogoDataUrl || '',
                 instagram,
                 twitter,
-                youtube,
-                website,
                 is_verified: currentlyVerified
             };
 
@@ -1081,10 +1378,7 @@
             const existing = getCreatorProfile(activeChannelUsername);
             const newVerifiedState = !isCreatorVerified(activeChannelUsername);
 
-            const updatedProfile = {
-                ...existing,
-                is_verified: newVerifiedState
-            };
+            const updatedProfile = { ...existing, is_verified: newVerifiedState };
 
             try {
                 const { error } = await supabaseClient
@@ -1096,12 +1390,9 @@
                 updateHeaderProfileUI();
                 renderFeedsFromCache();
                 await openCreatorChannel(activeChannelUsername);
-                alert(newVerifiedState
-                    ? `@${activeChannelUsername} is now a Verified Creator!`
-                    : `Verified badge removed from @${activeChannelUsername}.`
-                );
+                alert(newVerifiedState ? `@${activeChannelUsername} is now Verified!` : `Verified badge removed.`);
             } catch (err) {
-                alert('Failed to update verified status: ' + (err.message || 'Make sure is_verified column exists in profiles.'));
+                alert('Failed to update verified status: ' + err.message);
             }
         }
 
@@ -1147,13 +1438,13 @@
             document.getElementById('channel-display-title').textContent = `@${prof.username || cleanTarget}`;
             document.getElementById('channel-verified-pill').classList.toggle('hidden', !verified);
             document.getElementById('channel-admin-verify-text').textContent = verified ? 'Remove Verified' : 'Grant Verified';
+            document.getElementById('channel-dm-btn').classList.toggle('hidden', isOwnChannel);
 
             document.getElementById('channel-short-bio').textContent = prof.bio || 'Creator on BeaCreator Community Hub';
             document.getElementById('channel-about-bio').textContent = prof.bio || 'No short bio provided.';
             document.getElementById('channel-about-full').textContent = prof.about || 'No detailed About section added yet.';
             document.getElementById('channel-edit-own-btn').classList.toggle('hidden', !isOwnChannel);
 
-            // Render Social Links
             const socialLinksEl = document.getElementById('channel-social-links');
             let socialHtml = '';
             if (prof.instagram) {
@@ -1163,12 +1454,6 @@
             if (prof.twitter) {
                 const twUrl = prof.twitter.startsWith('http') ? prof.twitter : `https://twitter.com/${prof.twitter.replace('@','')}`;
                 socialHtml += `<a href="${twUrl}" target="_blank" class="px-3.5 py-2 rounded-xl bg-zinc-900 border border-zinc-800 text-xs font-bold text-sky-400 hover:border-sky-500 flex items-center gap-2"><i class="fa-brands fa-twitter text-sm"></i> Twitter / X</a>`;
-            }
-            if (prof.youtube) {
-                socialHtml += `<a href="${prof.youtube}" target="_blank" class="px-3.5 py-2 rounded-xl bg-zinc-900 border border-zinc-800 text-xs font-bold text-red-400 hover:border-red-500 flex items-center gap-2"><i class="fa-brands fa-youtube text-sm"></i> YouTube</a>`;
-            }
-            if (prof.website) {
-                socialHtml += `<a href="${prof.website}" target="_blank" class="px-3.5 py-2 rounded-xl bg-zinc-900 border border-zinc-800 text-xs font-bold text-purple-400 hover:border-purple-500 flex items-center gap-2"><i class="fa-solid fa-globe text-sm"></i> Website</a>`;
             }
             socialLinksEl.innerHTML = socialHtml || '<span class="text-xs text-zinc-500">No external links provided.</span>';
 
@@ -1257,17 +1542,14 @@
             if (!activeChannelUsername || !supabaseClient) return;
             const myProfile = getMyProfile();
             if (!myProfile || !myProfile.username) {
-                alert('Please create your channel username first so creators can see who followed them!');
+                alert('Please create your channel username first!');
                 openProfileModal();
                 return;
             }
 
             const follower = myProfile.username;
             const following = activeChannelUsername;
-            if (follower.toLowerCase() === following.toLowerCase()) {
-                openProfileModal();
-                return;
-            }
+            if (follower.toLowerCase() === following.toLowerCase()) return;
 
             const existingIndex = followsList.findIndex(
                 f => String(f.follower_username || '').toLowerCase() === follower.toLowerCase() &&
@@ -1278,11 +1560,7 @@
                 followsList.splice(existingIndex, 1);
                 renderChannelFollowersUI();
                 try {
-                    await supabaseClient
-                        .from('follows')
-                        .delete()
-                        .eq('follower_username', follower)
-                        .eq('following_username', following);
+                    await supabaseClient.from('follows').delete().eq('follower_username', follower).eq('following_username', following);
                 } catch (_) {}
             } else {
                 const newEntry = {
@@ -1408,10 +1686,7 @@
             renderCommentsModalList(activeCommentVideoId);
 
             try {
-                await supabaseClient
-                    .from('comments')
-                    .update({ likes: newLikes })
-                    .eq('id', numericId);
+                await supabaseClient.from('comments').update({ likes: newLikes }).eq('id', numericId);
             } catch (_) {}
         }
 
@@ -1423,11 +1698,10 @@
             countBadge.textContent = String(allComments.length);
 
             if (!allComments.length) {
-                listEl.innerHTML = '<div class="empty-state py-8">No comments yet. Drop the first feedback for this creator!</div>';
+                listEl.innerHTML = '<div class="empty-state py-8">No comments yet. Drop the first feedback!</div>';
                 return;
             }
 
-            // Separate main comments and replies
             const topComments = allComments.filter(c => !c.parent_id);
             const repliesMap = {};
             allComments.forEach(c => {
@@ -1445,12 +1719,10 @@
                 const rawAuthor = c.author || 'Creator';
                 const safeAuthor = escapeHtml(rawAuthor);
                 const jsAuthor = escapeJsString(rawAuthor);
-                const text = escapeHtml(c.content || '');
+                const text = formatTextWithHashtags(c.content || '');
                 const likes = Math.max(0, Number(c.likes) || 0);
                 const isLiked = commentLikedSet.has(cId);
-                const date = c.created_at
-                    ? new Date(c.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
-                    : 'Just now';
+                const date = c.created_at ? new Date(c.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) : '';
 
                 const commentReplies = repliesMap[cId] || [];
                 const repliesHtml = commentReplies.map(r => {
@@ -1458,7 +1730,7 @@
                     const rAuthor = r.author || 'Creator';
                     const sRAuthor = escapeHtml(rAuthor);
                     const jsRAuthor = escapeJsString(rAuthor);
-                    const rText = escapeHtml(r.content || '');
+                    const rText = formatTextWithHashtags(r.content || '');
                     const rLikes = Math.max(0, Number(r.likes) || 0);
                     const rIsLiked = commentLikedSet.has(rId);
                     const rDate = r.created_at ? new Date(r.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) : '';
@@ -1520,7 +1792,7 @@
 
             const myProfile = getMyProfile();
             if (!myProfile || !myProfile.username) {
-                alert('Create your channel username first before posting a comment!');
+                alert('Create your channel username first!');
                 closeCommentsModal();
                 openProfileModal();
                 return;
@@ -1561,7 +1833,7 @@
                 renderCommentsModalList(activeCommentVideoId);
                 updateCommentCountBadges(activeCommentVideoId);
             } catch (err) {
-                alert('Could not post comment: ' + (err.message || 'Make sure comments table is updated with likes and parent_id.'));
+                alert('Could not post comment: ' + err.message);
             } finally {
                 submitBtn.disabled = false;
                 submitBtn.textContent = 'Post';
@@ -1575,7 +1847,6 @@
             });
         }
 
-        // SAVED / WATCH LATER FUNCTIONALITY
         function getSavedSet() {
             try {
                 const raw = localStorage.getItem(SAVED_STORAGE_KEY);
@@ -1605,62 +1876,50 @@
             return getSavedSet().has(Number(videoId));
         }
 
-        // SHARE LINK FUNCTIONALITY
         function shareVideo(videoId, event) {
             if (event) event.stopPropagation();
             const shareUrl = window.location.href.split('#')[0] + '#video-' + videoId;
             if (navigator.clipboard && navigator.clipboard.writeText) {
-                navigator.clipboard.writeText(shareUrl).then(() => {
-                    alert('Video link copied to clipboard!');
-                }).catch(() => {
-                    prompt('Copy video link:', shareUrl);
-                });
+                navigator.clipboard.writeText(shareUrl).then(() => alert('Video link copied to clipboard!'));
             } else {
                 prompt('Copy video link:', shareUrl);
             }
         }
 
-        // DELETE VIDEO FUNCTIONALITY
         async function deleteVideo(videoId, videoUrl, event) {
             if (event) event.stopPropagation();
             const myUsername = getActiveUsername();
             const videoObj = allVideosCache.find(v => Number(v.id) === Number(videoId));
             const author = videoObj ? videoObj.author : '';
-
             const isOwner = myUsername && author && myUsername.toLowerCase() === author.toLowerCase();
             
             if (!isOwner) {
                 const pin = prompt('Enter Admin PIN to delete this video:');
                 if (pin !== ADMIN_SECRET_PIN) {
-                    alert('Unauthorized. Only the video creator or admin can delete this video.');
+                    alert('Unauthorized.');
                     return;
                 }
             }
 
-            if (!confirm('Are you sure you want to delete this video? This cannot be undone.')) return;
+            if (!confirm('Are you sure you want to delete this video?')) return;
 
             try {
                 if (supabaseClient) {
                     if (videoUrl && videoUrl.includes('/videos/')) {
                         const pathPart = videoUrl.split('/videos/').pop();
-                        if (pathPart) {
-                            await supabaseClient.storage.from('videos').remove([decodeURIComponent(pathPart)]);
-                        }
+                        if (pathPart) await supabaseClient.storage.from('videos').remove([decodeURIComponent(pathPart)]);
                     }
-                    const { error } = await supabaseClient.from('videos').delete().eq('id', Number(videoId));
-                    if (error) throw error;
+                    await supabaseClient.from('videos').delete().eq('id', Number(videoId));
                 }
-
                 allVideosCache = allVideosCache.filter(v => Number(v.id) !== Number(videoId));
                 renderFeedsFromCache();
                 if (activeChannelUsername) openCreatorChannel(activeChannelUsername);
                 alert('Video deleted successfully.');
             } catch (err) {
-                alert('Failed to delete video: ' + (err.message || 'Check database policies.'));
+                alert('Failed to delete video: ' + err.message);
             }
         }
 
-        // CUSTOM VIDEO PLAYER & VIEWS TRACKER
         function initCustomPlayer(containerId, videoId) {
             const container = document.getElementById(containerId);
             if (!container) return;
@@ -1700,7 +1959,6 @@
                 container.classList.remove('paused');
                 if (bigPlayBtn) bigPlayBtn.style.opacity = '0';
                 if (playPauseBtn) playPauseBtn.innerHTML = '<i class="fa-solid fa-pause text-xs"></i>';
-                
                 recordVideoView(videoId);
             });
 
@@ -1732,20 +1990,15 @@
                 muteBtn.addEventListener('click', (e) => {
                     e.stopPropagation();
                     video.muted = !video.muted;
-                    muteBtn.innerHTML = video.muted
-                        ? '<i class="fa-solid fa-volume-xmark text-xs"></i>'
-                        : '<i class="fa-solid fa-volume-high text-xs"></i>';
+                    muteBtn.innerHTML = video.muted ? '<i class="fa-solid fa-volume-xmark text-xs"></i>' : '<i class="fa-solid fa-volume-high text-xs"></i>';
                 });
             }
 
             if (fullscreenBtn) {
                 fullscreenBtn.addEventListener('click', (e) => {
                     e.stopPropagation();
-                    if (video.requestFullscreen) {
-                        video.requestFullscreen();
-                    } else if (video.webkitEnterFullscreen) {
-                        video.webkitEnterFullscreen();
-                    }
+                    if (video.requestFullscreen) video.requestFullscreen();
+                    else if (video.webkitEnterFullscreen) video.webkitEnterFullscreen();
                 });
             }
         }
@@ -1763,17 +2016,8 @@
             });
 
             try {
-                const { data, error } = await supabaseClient
-                    .from('videos')
-                    .update({ views: currentViews + 1 })
-                    .eq('id', numericId)
-                    .select('views')
-                    .single();
-
-                if (!error && data) {
-                    const updated = Number(data.views ?? (currentViews + 1));
-                    if (cachedItem) cachedItem.views = updated;
-                }
+                const { data } = await supabaseClient.from('videos').update({ views: currentViews + 1 }).eq('id', numericId).select('views').single();
+                if (data && cachedItem) cachedItem.views = Number(data.views ?? (currentViews + 1));
             } catch (_) {}
         }
 
@@ -1817,7 +2061,7 @@
         function openUploadModal() {
             const myProfile = getMyProfile();
             if (!myProfile || !myProfile.username) {
-                alert('Create your channel username & logo first before uploading a video!');
+                alert('Create your channel username & logo first before uploading!');
                 openProfileModal();
                 return;
             }
@@ -1830,10 +2074,7 @@
 
         async function handleGlobalUpload(event) {
             event.preventDefault();
-            if (!supabaseClient) {
-                alert('Supabase is not connected.');
-                return;
-            }
+            if (!supabaseClient) return alert('Supabase not connected.');
 
             const myProfile = getMyProfile();
             const author = (myProfile && myProfile.username) ? myProfile.username : 'Creator';
@@ -1844,39 +2085,29 @@
             const btn = document.getElementById('upload-submit-btn');
 
             if (!fileInput) return;
-            if (!['video/mp4', 'video/webm'].includes(fileInput.type)) {
-                alert('Please choose an MP4 or WebM video file.');
-                return;
-            }
-            const maxBytes = 50 * 1024 * 1024;
-            if (fileInput.size > maxBytes) {
-                alert('For this basic uploader, choose a video smaller than 50 MB.');
-                return;
-            }
+            if (fileInput.size > 50 * 1024 * 1024) return alert('Choose a video smaller than 50 MB.');
 
             btn.disabled = true;
             btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i> Uploading to Cloud...';
             try {
                 const fileName = `${Date.now()}_${fileInput.name.replace(/[^a-zA-Z0-9._-]/g, '')}`;
-                const { error: storageError } = await supabaseClient.storage
-                    .from('videos')
-                    .upload(fileName, fileInput, { contentType: fileInput.type, upsert: false });
-                if (storageError) throw new Error('Storage Error: ' + storageError.message);
+                const { error: storageError } = await supabaseClient.storage.from('videos').upload(fileName, fileInput, { contentType: fileInput.type, upsert: false });
+                if (storageError) throw new Error(storageError.message);
 
                 const { data: publicUrlData } = supabaseClient.storage.from('videos').getPublicUrl(fileName);
-                const videoUrl = publicUrlData.publicUrl;
                 const { error: dbError } = await supabaseClient.from('videos').insert([
-                    { title, description: desc, video_url: videoUrl, format: type, author, likes: 0, views: 0 }
+                    { title, description: desc, video_url: publicUrlData.publicUrl, format: type, author, likes: 0, views: 0 }
                 ]);
-                if (dbError) throw new Error('Database Error: ' + dbError.message);
+                if (dbError) throw new Error(dbError.message);
 
                 closeUploadModal();
                 document.getElementById('vid-title').value = '';
                 document.getElementById('vid-desc').value = '';
                 document.getElementById('vid-file').value = '';
                 await loadGlobalVideos(true);
+                renderTrendingHashtags();
             } catch (error) {
-                alert(error.message || 'Upload failed. Please try again.');
+                alert('Upload failed: ' + error.message);
             } finally {
                 btn.disabled = false;
                 btn.innerHTML = '<span>Publish Globally</span>';
@@ -1925,25 +2156,18 @@
             const longFeed = document.getElementById('long-feed');
 
             if (!supabaseClient) {
-                const message = '<div class="empty-state text-amber-300">Supabase is not connected.</div>';
-                shortsFeed.innerHTML = message;
-                longFeed.innerHTML = message;
+                shortsFeed.innerHTML = '<div class="empty-state text-amber-300">Supabase not connected.</div>';
+                longFeed.innerHTML = '<div class="empty-state text-amber-300">Supabase not connected.</div>';
                 return;
             }
 
             if (forceRefresh || !allVideosCache.length) {
-                shortsFeed.innerHTML = '<div class="empty-state"><i class="fa-solid fa-spinner fa-spin mr-2"></i>Loading Shorts...</div>';
-                longFeed.innerHTML = '<div class="empty-state"><i class="fa-solid fa-spinner fa-spin mr-2"></i>Loading long videos...</div>';
-
                 try {
-                    const { data: videos, error } = await supabaseClient
-                        .from('videos')
-                        .select('*')
-                        .order('created_at', { ascending: false });
+                    const { data: videos, error } = await supabaseClient.from('videos').select('*').order('created_at', { ascending: false });
                     if (error) throw error;
                     allVideosCache = videos || [];
                 } catch (error) {
-                    const message = `<div class="empty-state text-red-300">Could not load videos: ${escapeHtml(error.message || 'Unknown error')}</div>`;
+                    const message = `<div class="empty-state text-red-300">Error: ${escapeHtml(error.message)}</div>`;
                     shortsFeed.innerHTML = message;
                     longFeed.innerHTML = message;
                     return;
@@ -1964,10 +2188,8 @@
 
             if (searchQuery) {
                 filtered = filtered.filter(v => {
-                    const titleMatch = (v.title || '').toLowerCase().includes(searchQuery);
-                    const descMatch = (v.description || '').toLowerCase().includes(searchQuery);
-                    const authorMatch = (v.author || '').toLowerCase().includes(searchQuery);
-                    return titleMatch || descMatch || authorMatch;
+                    const fullText = ((v.title || '') + ' ' + (v.description || '') + ' ' + (v.author || '')).toLowerCase();
+                    return fullText.includes(searchQuery);
                 });
             }
 
@@ -2003,22 +2225,22 @@
 
             shortsFeed.innerHTML = shorts.length
                 ? shorts.map(v => renderVideoCard(v, 'short')).join('')
-                : '<div class="empty-state">No Shorts found matching your criteria.</div>';
+                : '<div class="empty-state">No Shorts found.</div>';
 
             longFeed.innerHTML = longs.length
                 ? longs.map(v => renderVideoCard(v, 'long')).join('')
-                : '<div class="empty-state">No long videos found matching your criteria.</div>';
+                : '<div class="empty-state">No long videos found.</div>';
 
             observeFeedVideos();
         }
 
         function renderVideoCard(video, format) {
             const id = Number(video.id);
-            const title = escapeHtml(video.title || 'Untitled video');
+            const title = formatTextWithHashtags(video.title || 'Untitled video');
             const rawAuthor = video.author || 'Creator';
             const author = escapeHtml(rawAuthor);
             const jsAuthor = escapeJsString(rawAuthor);
-            const description = escapeHtml(video.description || 'No description added.');
+            const description = formatTextWithHashtags(video.description || 'No description.');
             const url = safeVideoUrl(video.video_url);
             const likes = Math.max(0, Number(video.likes) || 0);
             const views = Math.max(0, Number(video.views) || 0);
@@ -2043,7 +2265,7 @@
                 return `
                     <article class="short-card" id="video-${id}">
                         <div id="player-container-${id}" class="custom-video-container paused" oncontextmenu="return false;">
-                            <video class="custom-player-video" data-src="${url}" playsinline preload="none" controlsList="nodownload" disablePictureInPicture aria-label="${title}"></video>
+                            <video class="custom-player-video" data-src="${url}" playsinline preload="none" controlsList="nodownload" disablePictureInPicture aria-label="${video.title || ''}"></video>
                             <div class="big-play-btn player-big-play"><i class="fa-solid fa-play"></i></div>
                             
                             <div class="shorts-controls-overlay" onclick="event.stopPropagation()">
@@ -2114,7 +2336,7 @@
                 return `
                     <article class="long-card" id="video-${id}">
                         <div id="player-container-${id}" class="custom-video-container is-long paused" oncontextmenu="return false;">
-                            <video class="custom-player-video" data-src="${url}" playsinline preload="none" controlsList="nodownload" disablePictureInPicture aria-label="${title}"></video>
+                            <video class="custom-player-video" data-src="${url}" playsinline preload="none" controlsList="nodownload" disablePictureInPicture aria-label="${video.title || ''}"></video>
                             <div class="big-play-btn player-big-play"><i class="fa-solid fa-play"></i></div>
                             <div class="long-video-controls" onclick="event.stopPropagation()">
                                 <input type="range" min="0" max="100" value="0" class="long-progress-bar video-progress-bar">
@@ -2246,7 +2468,7 @@
                     el.textContent = String(current);
                 });
                 if (buttonEl) buttonEl.disabled = false;
-                alert('Could not save like: ' + (error.message || 'Check Supabase update policies.'));
+                alert('Could not save like: ' + error.message);
             } finally {
                 likingInProgress.delete(numericId);
             }
